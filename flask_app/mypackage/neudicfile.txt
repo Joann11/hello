@@ -1,0 +1,4 @@
+neutral 0
+support 0
+meaning 0
+life 0

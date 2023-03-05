@@ -1,0 +1,150 @@
+{% extends 'layout.html' %}
+{% block title %}Keyword{% endblock %}
+
+{% block content %}
+<form action="{{ url_for("keyword")}}" method="post">
+    <title>Sentimental Analysis For Mental Health</title>
+  
+  <h1>Sentimental Analysis For Mental Health</h1>
+    <label for="positive">Positive KeyWords and Score:</label>
+    <textarea type="text" id="positiveList" name="positiveList" placeholder="happy 4" >
+    </textarea>
+    <button type="submit" name="pos" value="Submit Positive">Submit</button>
+        </br>
+       
+        <label for="negative">Negative KeyWords and Score:</label>
+    <textarea type="text" id="negativeList" name="negativeList" placeholder="sad 4">
+    </textarea>
+
+    <button type="submit"  name="neg" value="Submit Negative">Submit</button>
+    <div class="container mt-4">
+        <label for="positive">Positive:</label>
+
+        <div class="row">
+          <div class="col-2 row-heading">
+            Keywords
+          </div>
+          <div class="col-2 row-heading">
+            Score
+          </div>
+        </div>
+    <div class="row">
+        <div class="col-2">
+            <input type="text" value="happy" name="positiveList" placeholder="happy" />
+        </div>
+        <div class="col-2">
+            <input type="number" value="4" placeholder="4"/>
+        </div>
+    </div>
+</div>
+     
+</br>
+    {% if addedneg %}
+     <h2>Negative Dictionary</h2>
+    <pre id="addedneg">Newly added keywords: {{ addedneg }}</pre>
+       <table style="width:100%", border="1">
+        <tr>
+            <th>Keywords</th>
+            <th>Score 1 - 4</th>
+        </tr>
+    {% for n in negativedic %} 
+ 
+        <tr>               
+            <td>{{ n }}</td>
+            <td>{{ negativedic[n] }}</td>
+            
+                                 
+        </tr>
+         {% endfor %}
+     </table>
+
+     {% endif %}
+
+    {% if addedpos %}
+    <h2>Positive Dictionary</h2>
+
+    <pre id="addedpos"> Newly added keywords: {{ addedpos }}</pre>
+    <table style="width:100%", border="1">
+        <tr>
+            <th>Keywords</th>
+            <th>Score 1 - 4</th>
+        </tr>
+    {% for n in positivedic %}
+        <tr>               
+            <td>{{ n }}</td>
+            <td>{{ positivedic[n]}}</td>
+                     
+        </tr>
+         {% endfor %}
+     </table>
+    {% endif %}
+
+
+
+    <h1>Add Keywords</h1>
+    <form action="/add_keywords" method="POST">
+      <table>
+        <tr>
+          <th>Keyword</th>
+          <th>Score</th>
+          <th>Category</th>
+        </tr>
+        <tr>
+          <td><input type="text" name="keyword[]"></td>
+          <td><input type="number" name="score[]"></td>
+          <td>
+            <select name="category[]">
+              <option value="positive"  >Positive</option>
+              <option value="negative" >Negative</option>
+              <option value="neutral" >Neutral</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td><input type="text" name="keyword[]"></td>
+          <td><input type="number" name="score[]"></td>
+          <td>
+            <select name="category[]">
+              <option value="positive">Positive</option>
+              <option value="negative">Negative</option>
+              <option value="neutral">Neutral</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td><input type="text" name="keyword[]"></td>
+          <td><input type="number" name="score[]"></td>
+          <td>
+            <select name="category[]">
+              <option value="positive">Positive</option>
+              <option value="negative">Negative</option>
+              <option value="neutral">Neutral</option>
+            </select>
+          </td>
+        </tr>
+      </table>
+      <br>
+      <button type="button" onclick="addRow()">Add More Keywords</button>
+      <br><br>
+      <input type="submit" value="Submit">
+    </form>
+    <script>
+      function addRow() {
+        var table = document.getElementsByTagName('table')[0];
+        var newRow = table.insertRow(-1);
+        var newCell1 = newRow.insertCell(0);
+        var newCell2 = newRow.insertCell(1);
+        var newCell3 = newRow.insertCell(2);
+        newCell1.innerHTML = '<input type="text" name="keyword[]">';
+        newCell2.innerHTML = '<input type="number" name="score[]">';
+        newCell3.innerHTML = `
+          <select name="category[]">
+            <option value="positive">Positive</option>
+            <option value="negative">Negative</option>
+            <option value="neutral">Neutral</option>
+          </select>`;
+      }
+    </script>
+  </body>
+</html>
+{% endblock %}
