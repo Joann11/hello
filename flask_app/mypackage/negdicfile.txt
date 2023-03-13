@@ -26,6 +26,7 @@ depression 4
 suicide 4
 broken 4
 killme 4
+kill 4
 worthless 3
 selfharmmm 4
 pain 3

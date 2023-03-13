@@ -9,7 +9,17 @@
 <html>
 <head>
     <title>Sentiment Analysis Results</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
     <style>
+  
+
+        body{
+            background-color: rgb(163, 192, 201) !important;
+        }
+    
         .score {
             display: none;
             position: absolute;
@@ -21,24 +31,123 @@
         .sentence:hover .score {
             display: block;
         }
+
+        .perSentence:hover  {
+            outline-style:solid;
+            outline-width:2px;
+            outline-color:red;
+        }
+        .negativekey{
+            background-color: rgb(255, 149, 122);
+        }
+        .positivekey{
+            background-color: rgb(171, 255, 171);
+        }
+        .negationSign{
+            background-color: rgb(255, 255, 106);
+        }
+        .adverb_low{
+            background-color: rgb(255, 179, 129);
+        }
+        .adverb_mid{
+            background-color: rgb(255, 151, 82);
+        }
+        .adverb_high{
+            background-color: rgb(255, 135, 55);
+        }
+        .adverb_extreme{
+            background-color: rgb(255, 102, 0);
+        }
     </style>
 </head>
 <body>
     <h1>Sentiment Analysis</h1>
-    <form method="post" action="/analyze">
+    <form method="post" action="{{ url_for("analyze")}}">
         <label for="input_text">Enter some text:</label><br>
         <textarea id="input_text" name="input_text"></textarea><br>
         <input type="submit" value="Analyze">
-    </form>
     
+     </form>
     <h1>Sentiment Analysis Results</h1>
-    <p>Input text:</p>
-    <p>{{ input_text }}</p>
+    <p><b>Input text:</b>
+    <span>{{ textP }}</span>
+    </p>
     <hr>
-    <h2>Sentences:</h2>
-    {% for i, sent in enumerate(sentence_scores) %}
-        <p class="sentence">Sentence {{ i+1 }}: "{{ sent.text }}"<span class="score">Score: {{ sent.score }}</span></p>
+    <h2 >Sentences:</h2>
+    <div>
+   
+    {% for sent in sentences %}
+    <span class = "perSentence">
+    <span class="sentence " onmouseover="showTooltip({{ sent.id }})" onmouseout="hideTooltip({{ sent.id }})">
+      
+      {% for token in sent %}
+        
+        
+        {% if token.text in keywords %}
+            {% if token.text in negativedictionary%}
+                <span class="keyword negativekey" title="Score: {{ negativedictionary[token.text] }}">{{ token.text }}</span>
+                
+            {% elif token.text in posdictionary%}
+                <span class="keyword positivekey" title="Score: {{ posdictionary[token.text] }}">{{ token.text }}</span>
+            
+            {% elif token.dep_ == 'neg'%}
+                <span class="keyword negationSign" title="Found negation">{{ token.text }}</span>
+                
+             
+                
+                
+                
+        {% endif %}
+        
+        {% if token.text in adverbs %}
+
+
+        {% if %}
+        <span class="keyword negativekey" title="Score: {{ negativedictionary[token.text] }}">{{ token.text }}</span>
+        
+        {% elif token.text in posdictionary%}
+        <span class="keyword positivekey" title="Score: {{ posdictionary[token.text] }}">{{ token.text }}</span>
+    
+        {% elif token.dep_ == 'neg'%}
+        <span class="keyword negationSign" title="Found negation">{{ token.text }}</span>
+      
+
+        {% endif %}
+
+        
+        {% else %}
+            <span>{{token.text}}</span>
+    
+        {% endif %}
+   
+      
+  
+    {% endfor %}</span>  </span>
     {% endfor %}
+</div>
+
+<div>
+    
+    <img src="{{url_for('static', filename='my_plot.png')}}">"
+
+</div>
+    <script>
+        function showTooltip(sentId) {
+          var keywords = document.querySelectorAll('#kw-' + sentId);
+          keywords.forEach(function(kw) {
+            var score = kw.getAttribute('data-score');
+            kw.setAttribute('title', 'Score: ' + score);
+          });
+        }
+        
+        function hideTooltip(sentId) {
+          var keywords = document.querySelectorAll('#kw-' + sentId);
+          keywords.forEach(function(kw) {
+            kw.removeAttribute('title');
+          });
+        }
+      </script>
+  
 </body>
 
 

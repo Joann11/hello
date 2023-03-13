@@ -243,7 +243,7 @@ def keyword():
  
 @app.route('/evaluation', methods=['GET', 'POST'])
 def analyze():
-    
+    if request.method == "POST":
      
         input_text = request.form["input_text"]
 
@@ -251,8 +251,22 @@ def analyze():
         f.write(input_text)
         # f.write(t)
         f.close()
-        processed_text = input_text
+        textP = input_text
         calculatescore_function()
+        sentences = list(getText().sents)
+        keywords = list(detectedwords.keys())
+        negativedictionary = negativedic
+        posdictionary = positivedic
+
+
+        
+        c = sentenceAnalysis()
+        graphP = plotGraph(c)
+
+        # p,n,c = sentenceAnalysis()
+        # graphP = plotGraph(p,n,c)
+       
+        
         
 
         #scores = analyzeScores()
@@ -262,7 +276,9 @@ def analyze():
        # doc = nlp(text)
         # Perform sentiment analysis on the document here
         # ...
-        return {'sentiment_score': 0.8, 'word_scores': {'happy': 0.9, 'sad': 0.2}}
+        #return {'sentiment_score': 0.8, 'word_scores': {'happy': 0.9, 'sad': 0.2}}
+        return render_template('textanalysis.html', textP = textP, sentences = sentences, keywords = keywords, negativedictionary = negativedictionary, posdictionary = posdictionary, graphP = graphP)
+
     return render_template('textanalysis.html')
 
 if __name__=='__main__':

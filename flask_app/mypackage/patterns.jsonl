@@ -26,6 +26,7 @@
 {"label":"Negative","pattern":"suicide"}
 {"label":"Negative","pattern":"broken"}
 {"label":"Negative","pattern":"killme"}
+{"label":"Negative","pattern":"kill"}
 {"label":"Negative","pattern":"worthless"}
 {"label":"Negative","pattern":"selfharmmm"}
 {"label":"Negative","pattern":"pain"}

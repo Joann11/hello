@@ -5,9 +5,10 @@ filename = "example.txt"
 
 import re
 import spacy
+import plotGraph
 import keywords
 import matplotlib.pyplot as plt
-
+import detect
 from spacy.symbols import ORTH
 from spacy.matcher import Matcher
 from spacy.matcher import PhraseMatcher
@@ -15,10 +16,6 @@ from spacy.pipeline import EntityRuler
 from jinja2 import Template
 from flask import render_template
 from faker import Faker
-import random
-
-from random import randint
-
 
 #from spacy import displacy
 
@@ -27,7 +24,7 @@ matcher = PhraseMatcher(nlp.vocab)
 neutraldic = keywords.addnewKeyWordNeu_function(neudicfile)
 negativedic = keywords.addnewKeyWordNegative_function(negdicfile)
 positivedic = keywords.addnewKeyWordPositive_function(posdicfile)
-                        
+detectedwords = {}                       
 
 
 
@@ -58,103 +55,132 @@ def getText():
     text = open(filename, "r").read()
     text_doc = nlp(text)
     return text_doc
+
+# def wh_handling(text):
+
+#     for token in text:
+#         if token.dep_ == "relcl":
+#             subject = None
+#             for child in token.children:
+#                 if child.dep_ == "nsubj":
+#                     subject = child
+#             if subject is None:
+#                 continue
+#             new_sentence = f"{subject} {token.head.text}"
+#             for child in token.children:
+#                 if child.dep_ != "nsubj":
+#                     new_sentence += f" {child}"
+#             return new_sentence.strip(), text.replace(new_sentence, "").strip()
+#     return None, None
+
+# def conjunction_handling(text):
+#     for token in text:
+#         if token.text == "and":
+#             subject = None
+#             for child in token.children:
+#                 if child.dep_ == "conj":
+#                     subject = child
+#             if subject is None:
+#                 continue
+#             if subject.dep_ == "ccomp":
+#                 subject = None
+#                 for child in token.children:
+#                     if child.dep_ == "nsubj":
+#                         subject = child
+#                 if subject is None:
+#                     continue
+#             new_sentence = f"{subject.text} {token.head.text}"
+#             for child in token.children:
+#                 if child.dep_ != "conj":
+#                     new_sentence += f" {child}"
+#             return new_sentence.strip(), text.replace(new_sentence, "").strip()
+#     return None, None
+
+# def insertion_handling(text):
     
-def generaterandomSentTest():
-      # Declaring names, verbs and nouns
-        names=["You","I","They","He","She","Robert","Steve"]
-        verbs=["was", "is", "are", "were"]
-        nouns=["playing cricket.", "watching television.", "singing.", "fighting.", "cycling."]
-        negsent = negativedic
-        sent = ""
-        t = random.randint(0,10)
-        for x in range(t):
-            
+#     for token in text:
+#         if token.dep_ in ["amod", "appos", "acl", "advcl", "advmod", "relcl"]:
+#             clause_root = None
+#             for child in token.children:
+#                 if child.dep_ == "mark":
+#                     clause_root = child.head
+#                 elif child.dep_ == "relcl":
+#                     clause_root = child
+#             if clause_root is None:
+#                 continue
+#             clause = clause_root.subtree
+#             subject = None
+#             for child in clause_root.children:
+#                 if child.dep_ == "nsubj":
+#                     subject = child
+#             if subject is None:
+#                 continue
+#             new_sentence = f"{subject} {clause_root.text}"
+#             for child in clause:
+#                 if child is not clause_root:
+#                     new_sentence += f" {child}"
+#             return new_sentence.strip(), text.replace(new_sentence, "").strip()
+#     return None, None
+
+# def split_complex_sentenceX(sentence):
+#     new_sentences = []
+#     while sentence:
+#         new_sentence, sentence = wh_handling(sentence)
+#         if new_sentence:
+#             new_sentences.append(new_sentence)
+#             continue
+#         new_sentence, sentence = conjunction_handling(sentence)
+#         if new_sentence:
+#             new_sentences.append(new_sentence)
+#             continue
+#         new_sentence, sentence = insertion_handling(sentence)
+#         if new_sentence:
+#             new_sentences.append(new_sentence)
+#             continue
+#         new_sentences.append(sentence.strip())
+#         break
+#     return new_sentences
+
+# doccc = getText()
+# split_complex_sentenceX(doccc)
+
+
+# #spliting sentence
+# def split_complex_sentence(sentence):
+#     doc = nlp(sentence)
+    
+#     # Handling Relational Arguments (R-ARGs)
+#     for token in doc:
+#         if token.dep_ == 'relcl':
+#             r_arg = token.head
+#             s_arg = [t for t in r_arg.lefts if t.dep_ == 'nsubj'][0]
+#             new_sentence = s_arg.text + ' ' + sentence[s_arg.end:r_arg.start].strip() + ' ' + r_arg.text + ' ' + sentence[r_arg.end:].strip()
+#             return split_complex_sentence(new_sentence)
+    
+#     # Handling Conjunctions with Argument (ARG) following 'and'
+#     for token in doc:
+#         if token.text == 'and' and token.nbor(1).dep_ in ['dobj', 'pobj', 'nsubj', 'attr']:
+#             arg = token.nbor(1)
+#             new_sentence = sentence[:arg.idx] + sentence[arg.end:].lstrip()
+#             return [sentence[:token.idx].strip(), new_sentence.strip()]
         
-            a=(random.choice(names))
-            b=(random.choice(verbs))
-            c=(random.choice(list(negsent.keys())))
-            sent += a+" "+b+" "+c +"."
+#         # Handling Conjunctions with verb following 'and'
+#         elif token.text == 'and' and token.nbor(1).pos_ == 'VERB':
+#             s_arg = [t for t in token.lefts if t.dep_ == 'nsubj'][0]
+#             new_sentence = s_arg.text + ' ' + sentence[s_arg.end:token.idx].strip() + ' ' + token.nbor(1).text + ' ' + sentence[token.nbor(1).end:].strip()
+#             return [new_sentence.strip()]
+    
+#     # Handling Insertions
+#     for token in doc:
+#         if token.dep_ in ['amod', 'advmod', 'prep', 'appos', 'relcl']:
+#             new_sentence = sentence[token.left_edge.idx:token.right_edge.idx].strip()
+#             new_sentence = sentence[:token.head.idx].strip() + ' ' + new_sentence + ' ' + sentence[token.right_edge.idx:].strip()
+#             return [new_sentence.strip(), sentence[:token.left_edge.idx].strip()]
+        
+#     return [sentence.strip()]
 
-            print(sent)
-            
-        # f = open("example.txt", "w")
-        # f.write(str(sent))
-        # f.close()
+# #print(split_complex_sentence("I think she thinks I am rubbish and I am sad"))
 
-        return str(sent)
-generaterandomSentTest()
-
-# #create the list of words to match
-
-
-
-       
-
-
-# def addnewKeyWordNegative_function():
-
-#         with open(negdicfile, 'r') as f:
-#             for line in f:
-              
-#                         (key, val) = line.split() 
-#                         if(negativedic.get(key) is None):
-#                          negativedic[key] = int(val)
-            
-            
-#             for p in negativedic:
-#                 ruler.add_patterns([{"label": "Negative", "pattern": p}])
-
-       
-#             print (negativedic)
-#             return negativedic
-
-# def addnewKeyWordNeu_function():
-#             with open(neudicfile, 'r') as f:
-#                 for line in f:
-#                             (key, val) = line.split()
-#                             if(neutraldic.get(key) is None):
-
-#                                 neutraldic[key] = int(val)
-#                 for p in neutraldic:
-#                     ruler.add_patterns([{"label": "Neutral", "pattern": p}])
-
-#             print (neutraldic)
-#             return neutraldic
-
-# def addnewKeyWordPositive_function():
-#         with open(posdicfile, 'r') as f:
-#             for line in f:
-#                         (key, val) = line.split()
-#                         if(positivedic.get(key) is None):
-
-#                             positivedic[key] = int(val)
-                        
-#             for p in positivedic:
-#               ruler.add_patterns([{"label": "Positive", "pattern": p}])
-
-#         print(positivedic)
-#         return positivedic
-
-
-
-
-
-# depressedKeyWords = ['die', 'anxiety','insomnia','dysfunction','fatigue','nervous', 'unhappy', 'no focus', 'disturbed', 'isolation', 'lack of interest', 'low interaction', 'sleep problems', 'loss meaning in life', 'stressed', 'uneasiness', 'instability', 'moody', 'emotional', 'low self-esteem', 'have no emotional support', 'depressed', 'depression', 'suicide', 'broken', 'killme', 'worthless', 'selfharm', 'pain', 'sad', 'numb']
-# happyKeyWords = ['happy','grateful',]
-#obtain doc object for each word in the list and store it in a list
-#patterns = [nlp(keyword) for keyword in depressedKeyWords]
-# #happypatterns = [nlp(keyword) for keyword in happyKeyWords]
-# patternsNg = [nlp(keyword) for keyword in negativedic]
-# patternsNu = [nlp(keyword) for keyword in neutraldic]
-# patternsPs = [nlp(keyword) for keyword in positivedic]
-
-
-#add the pattern to the matcher
-##matcher.add("Negative Dictionary", patternsNg)
-#matcher.add("Positive Dictionary", patternsPs)
-#matcher.add("Neutral Dictionary", patternsNu)
-
-#process some text
 
 
 def setNegativeTotal(severetotal):
@@ -170,27 +196,50 @@ def setPositiveTotal(positivetotal):
 
 ##https://research.reading.ac.uk/research-blog/people-with-depression-use-language-differently-heres-how-to-spot-it/#:~:text=Those%20with%20symptoms%20of%20depression%20use%20significantly%20more%20first%20person,them%E2%80%9D%20or%20%E2%80%9Cshe%E2%80%9D.
 
-def detectpersonalpronounce():
-     temp = 0
-     text_doc = getText()
-    #detect personal pronounce
-     for token in text_doc:
+def totalScore(text, severetotal, positivetotal):
 
-                if token.text.lower() == "i" or token.text.lower() == "me" or token.text.lower() == "myself":
-                    print(token.text.lower())
-                    temp = 1
-                    return temp
+     detectedadverbLists = detect.detect_adverb(text) 
+     adscore = 0
+     totalscore = 0
+     if detectedadverbLists :
+                     for adverb in detectedadverbLists:
+                            adscore += adverb[2]
+
+
+     totalscore = positivetotal - severetotal
+     #if result is positive plus, else minus
+     if totalscore > 0 :
+        totalscore += adscore
+     else : 
+        totalscore -= adscore 
+     return totalscore
+
+def totalScorePersonalPronoun(totalscore):
+    #check for no pronoun, personal, or third person 
+    #https://arxiv.org/pdf/2009.08560.pdf split and rephrase research
+    temp = detect.detectpersonalpronoun(getText())
+
+    if temp == "personal":
+        totalscore * 2
+    elif temp == "third":
+        totalscore * 1.5
+    else :
+        totalscore
     
-     return temp
-            
+    #ddoc :https://subscription.packtpub.com/book/data/9781838987312/2/ch02lvl1sec13/splitting-sentences-into-clauses
 
 
-def totalScoreComment(severetotal, positivetotal, neu):
+
+
+
+
+def totalScoreComment(totalscore, positivetotal, severetotal, neu):
     
             
             #total analysis 
 
-            totalscore =  positivetotal - severetotal 
+         
+
             if(totalscore == 0):
                         comment = "<br> This sentences is Neutral</br>"
             elif(totalscore > 0):
@@ -214,7 +263,7 @@ def totalScoreComment(severetotal, positivetotal, neu):
 def totalscorePronounce(severetotal, positivetotal):
             comment = ""
             #total analysis with personal pronounce analysed
-            temp = detectpersonalpronounce()
+            temp = detect.detectpersonalpronounce(getText())
             if( temp > 0):
             
                     totalscore =  positivetotal - severetotal - temp
@@ -294,11 +343,7 @@ def createWordTable():
           if token.text in detectedwords.keys():
             sentiment = detectedwords.get(token.text)
 
-            # keyList = list(detectedwords.keys())
-            # val_list = list(detectedwords.values())
-            # position = keyList.index(token.text)
-            # print(position)
-
+           
             if sentiment == "Negative":
                   
                     scoring = negativedic.get(token.text.lower())
@@ -309,7 +354,6 @@ def createWordTable():
                     strW +=  str(scoring) 
 
             elif sentiment == "neg":
-                     #Negation found :"
                     strW += foundN
 
           else:
@@ -378,278 +422,10 @@ def printSA():
 
 
 
-detectedwords = {}
-
-
-
-def getWordCount(sent):
-    # Count words without counting punctuation 
-        temp = 0
-        clean_text = [token for token in sent if not token.is_punct]
-
-        temp = temp + 1
-        wordcount = len(clean_text)
-    
-        return wordcount
-
-def sentenceAnalysis():
-    totaleachSent = []
-   
-    averageN = []
-    averageP = []
-    averageC = []
-
-
-    for sent in getText().sents:
-        countK = 0
-        countPositive = 0 
-        countNegative = 0
-        for ent in sent.ents:
-                    
-            countK = countK + 1
-
-            if ent.label_ == "Negative":
-                    countNegative = countNegative + 1
-                    
-            elif  ent.label_ == "Positive":
-                    countPositive = countPositive + 1
-
-        averageP.append(countPositive / getWordCount(sent))
-        averageN.append(countNegative / getWordCount(sent))
-        averageC.append(countK / getWordCount(sent))        
-    
-  
-    return averageP, averageN, averageC
-
-
-
-def plotGraph(averageP, averageN, averageC):
-    y1 = averageP
-    y2 = averageN
-    y3 = averageC
-    x = []
-    
-    for i in range(len(averageC)):
-        x.append(i+1)
-        print(i)
-    
-    plt.plot(x, y1, label= "Positive")
-    plt.plot(x, y2, label = "Negative")
-    plt.plot(x, y3, label = "Total")
-
-    plt.xlabel('Sentences')
-    plt.ylabel('Average of keywords')
-    plt.xticks(x)
-    plt.title('Average of keywords/Total Words Per Sentence')
-    plt.legend()
-    plt.show()
-    plt.savefig('my_plot.png')
-
- 
-def plotGraphPerSentence(score):
-     y = score
-     x = []
-    
-     for token in getText():
-         if not token.is_punct:
-          x.append(token.text)
-        
-     plt.plot(x, y )
-
-     plt.xlabel('Words')
-     plt.ylabel('Score')
-     plt.xticks(x)
-     plt.title('Sentence Analysis')
-     plt.legend()
-     plt.show()
-     plt.savefig('plotsentence.png')
 
 
 
 
-def plotEachSentence(ent):
-        #findkeywords
-        print("BELLO"+ent.text)
-        scoring = 0
-        text_doc = getText()
-        score = []
-        foundNeg = False
-                                        
-        for token in text_doc:
-                 #if there is a negation such as 'not' in the text phrase
-                    if token.dep_ == 'neg':
-                        foundNeg = True
-
-                    
-        if not foundNeg:
-            for token in text_doc:
-                if token.text != ent.text:
-                    score.append(0)
-                else:
-                    if ent.label_ == "Negative":
-                        scoring =  -negativedic.get(ent.text.lower()) 
-                        score.append(scoring)
-                    elif ent.label_ == "Positive":
-                        scoring = positivedic.get(ent.text.lower()) 
-                        score.append(scoring)             
-        elif foundNeg:
-
-
-              for token in text_doc:
-                 if token.text != ent.text:
-                    score.append(0)
-               
-                 else:
-                        action = token.head.text
-                      
-                        #if it is a keyword then the idea is inverted like 'not depressed'
-                        if ent.text == action and ent.label_ == "Negative":
-                                #becomes neutral x = 0
-                                scoring =  negativedic.get(ent.text.lower()) * 0
-                                score.append(0)
-                                score.append(0)
-                                                
-                        #if is not happy inverted positive to negative
-                        elif ent.text == action and ent.label_ == "Positive":
-                                scoring = positivedic.get(ent.text.lower()) * -1
-                                score.append(scoring)
-                                score.append(scoring)
-
-                        else:
-                                
-                                
-                                if token.dep_ == 'neg':
-                                    
-                                    if ent.label_ == "Negative" :
-                                            scoring =  negativedic.get(ent.text.lower()) * 0
-                                            score.append(000)
-                                            
-                              
-                                    elif ent.label_ == "Positive":
-                                            scoring = positivedic.get(ent.text.lower()) * -1
-                                            score.append(-111)
-                                
-                                for i in range(len(score)):
-                                    foundindex = False
-                                    if score[i] == -111 or score[i] == 000:
-                                        foundindex = True
-                     
-                                    if foundindex :
-                                         if score[i] == -111:
-                                          score[i] == positivedic.get(ent.text.lower()) * -1
-
-                                         elif score[i] == 000:
-                                          score[i] =  0
-
-                                    
-                                           
-
-                        
-                                        
-
-
-
-                                # substuff = list(token.head.rights)
-                                # #FIND AUX IN THE SUB TREE SUCH AS BE, HAS DONE, WILL DO, SHOULD DO
-                                # if(token.n_rights > 0 and substuff[0].pos_ == 'AUX' ):
-
-                                #     for x in range(token.n_rights):
-                                #         if ent.label_ == "Negative":
-                                #              scoring =  negativedic.get(ent.text.lower()) * 0
-                                #              score.append(0)
-                              
-                                        
-                                #         elif ent.label_ == "Positive":
-                                #              scoring = positivedic.get(ent.text.lower()) * -1
-                                #              score.append(scoring)
-
-                       
-                    
-                                          
-
-
-                                    
-                                #     print("FOUND AUX")
-                                #     t = substuff[0] 
-                                #     substuff = list(t.rights)
-                                #     print(str(substuff))
-                                
-                        #         for k in substuff:
-                        #              if ent.text == k.text :
-                                        
-                        #                     if(ent.label_ == "Positive"):
-                                               
-
-                        #                         negationcomment += "Total Negative Score increased by" + str(positivedic.get(ent.text.lower())) +"because"
-
-                        #                         severetotal = severetotal + positivedic.get(ent.text.lower())
-                        #                         #positivetotal = positivetotal - positivedic.get(ent.text.lower())
-                        #                     print("Found negation " + token.text+ ent.text)
-                        #                     if(ent.label_ == "Negative"):
-            
-                        #                         negationcomment += "Total Ngative Score decreased by" + str(negativedic.get(ent.text.lower())) +"because"
-                        #                         severetotal = severetotal - negativedic.get(ent.text.lower())
-                                        
-                        #                     print("Found negation " + token.text+ ent.text)
-                        # negationcomment += "Found negation: " + token.text +" to keyword "+ ent.label_ + " :"+ ent.text
-    
-                        #score.append (positivedic.get(ent.text.lower() * -1))
-                                                
-                        
-        
-       
-            
-        return score; 
-
-#def testCase(typeSent):
-  #  if typeSent == "pos":
-
-#return the type of adverb meaning 
-def detect_adverb(sent):
-
-    score = 0
-   
-    for ent in sent.ents:
-
-        for token in sent:
-              for child in token.children:
-                if child.dep_ == 'advmod':
-                    adv_function = ''
-                    if child.text.lower() in ['quite','very', 'extremely', 'intensely']:
-                        if child.text == 'quite':
-                              score = 0.25
-                        elif child.text == 'very':
-                              score = 0.5
-                        elif child.text == 'very':
-                              score = 0.75
-                        elif child.text == 'intensely':
-                              score = 1
-                        adv_function = 'degree'
-                    else:
-                        for prep_child in child.children:
-                            if prep_child.dep_ == 'prep':
-                                if prep_child.pos_ == 'NOUN':
-                                    if prep_child.text == 'time':
-                                        adv_function = 'time'
-                                    else:
-                                        adv_function = 'place or direction'
-                                elif prep_child.pos_ == 'ADJ':
-                                    adv_function = 'manner'
-                    if adv_function : 
-                              return adv_function, score
-                       
-    return None
-
-
-
-
-
-#detect adverb such as very or quite
-def detect_adverbs_with_keyword(token):
-        
-            for child in token.children:
-                if child.dep_ == 'advmod':
-                    print(f"Adverb '{child.text}' modifying verb '{token.text}' detected.")
 
 
 def calculatescore_function():
@@ -675,7 +451,7 @@ def calculatescore_function():
         
         #     for ent in sent.ents:
       
-        for ent in text_doc.ents:
+        for ent in text_doc.ents :
                     
                     print("OK")
                     print(ent, ent.label_)
@@ -775,17 +551,17 @@ def calculatescore_function():
                             
                         
                         
-                        
-
+                   
                 #  print("score" + str(plotEachSentence(ent)))
                     #total analysis 
-                    comment = totalScoreComment(severetotal, positivetotal, neu)
+                    totalscore = totalScore(text_doc, severetotal, positivetotal)
+                    comment = totalScoreComment(totalscore,positivetotal, severetotal, neu)
                     commentP =  totalscorePronounce(severetotal, positivetotal)
 
                 
-        count = str(sentenceAnalysis())
+        count = str(plotGraph.sentenceAnalysis(text_doc))
                 
-        p,n,c = sentenceAnalysis()
+        #p,n,c = sentenceAnalysis()
         #  plotGraph(p,n,c)
 
         if not detectedwords:
