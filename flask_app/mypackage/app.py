@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, session
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re 
+from plotGraph import *
 from index import *
 from markupsafe import Markup
 # Flask constructor
@@ -11,10 +12,10 @@ app = Flask(__name__)
 app.secret_key = 'your secret key'
 
 # Enter your database connection details below
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root'
-app.config['MYSQL_DB'] = 'pythonlogin'
+app.config['MYSQL_HOST'] = 'jthp.host.cs.st-andrews.ac.uk'
+app.config['MYSQL_USER'] = 'jthp'
+app.config['MYSQL_PASSWORD'] = '.15is8Ssf8Wm0j'
+app.config['MYSQL_DB'] = 'jthp_pythonlogin'
 
 # Intialize MySQL
 mysql = MySQL(app)
@@ -87,6 +88,12 @@ def register():
         else:
             # Account doesnt exists and the form data is valid, now insert new account into accounts table
             cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s)', (username, password, email,))
+            query = "SELECT id FROM users WHERE username = ' "+ username+"';"
+            cursor.execute(query)
+            id = cursor.fetchone()[0]
+
+            cursor.execute('INSERT INTO user_roles VALUES (%i, %i)', (id, 1,))
+            
             mysql.connection.commit()
             msg = 'You have successfully registered!'
     elif request.method == 'POST':
@@ -111,7 +118,7 @@ def home():
 # A decorator used to tell the application
 # which URL is associated function
 
-# http://localhost:5000/pythinlogin/profile - this will be the profile page, only accessible for loggedin users
+# http://localhost:5000/profile - this will be the profile page, only accessible for loggedin users
 @app.route('/profile')
 def profile():
     # Check if user is loggedin
@@ -260,8 +267,8 @@ def analyze():
 
 
         
-        c = sentenceAnalysis()
-        graphP = plotGraph(c)
+        c = plotGraph.sentenceAnalysis(getText())
+        graphP = plotGraph.plotGraphC(c)
 
         # p,n,c = sentenceAnalysis()
         # graphP = plotGraph(p,n,c)

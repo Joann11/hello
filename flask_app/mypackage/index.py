@@ -6,6 +6,8 @@ filename = "example.txt"
 import re
 import spacy
 import plotGraph
+import json
+
 import keywords
 import matplotlib.pyplot as plt
 import detect
@@ -13,6 +15,7 @@ from spacy.symbols import ORTH
 from spacy.matcher import Matcher
 from spacy.matcher import PhraseMatcher
 from spacy.pipeline import EntityRuler
+from spacy.tokens import Token #import Token class from spacy
 from jinja2 import Template
 from flask import render_template
 from faker import Faker
@@ -25,8 +28,19 @@ neutraldic = keywords.addnewKeyWordNeu_function(neudicfile)
 negativedic = keywords.addnewKeyWordNegative_function(negdicfile)
 positivedic = keywords.addnewKeyWordPositive_function(posdicfile)
 detectedwords = {}                       
+Token.set_extension('score', default=False, force=True)
 
 
+def getText():
+    text = open(filename, "r").read()
+    text_doc = nlp(text)
+    return text_doc
+
+
+
+def set_score(doc):
+    for token in doc:
+        token._.set("score", 0.0)
 
 def  nlpSetRule():  
        
@@ -34,33 +48,31 @@ def  nlpSetRule():
         pattern = re.compile(r'"(.*?)"\s+=\s+"(.*?)"')
                     #Create the Ruler and Add it
 
-        ruler = nlp.add_pipe("entity_ruler", config={"phrase_matcher_attr": "LOWER"})
-
-        for p in negativedic:
-                ruler.add_patterns([{"label": "Negative", "pattern": p}])
+        ruler = nlp.add_pipe("entity_ruler", config={"phrase_matcher_attr": "LEMMA"})
+        #nlp.add_pipe(set_score, name='set_score', last=True)
       
+        for p in negativedic:
+                 ruler.add_patterns([{"label": "Negative", "pattern": p}])
+                 
         for x in neutraldic:
                  ruler.add_patterns([{"label": "Neutral", "pattern": x}])
+        
         for z in positivedic:
                  ruler.add_patterns([{"label": "Positive", "pattern": z}])
 
 
 
+
         ruler.to_disk("patterns.jsonl")  # saves patterns only
         ruler.to_disk("entity_ruler")    # saves patterns and config    
-                         
-                   
+                            
 
-def getText():
-    text = open(filename, "r").read()
-    text_doc = nlp(text)
-    return text_doc
 
 # def wh_handling(text):
 
-#     for token in text:
-#         if token.dep_ == "relcl":
-#             subject = None
+#      for token in text:
+#          if token.dep_ == "relcl":
+#            subject = None
 #             for child in token.children:
 #                 if child.dep_ == "nsubj":
 #                     subject = child
@@ -450,18 +462,26 @@ def calculatescore_function():
         # for sent in text_doc.sents:
         
         #     for ent in sent.ents:
-      
+      #  lemma = [token.lemma_ for token in text_doc]
+      #  text_doc = ' '.join(lemma)
+     #   text_doc = nlp(text_doc)
+        key = ""
         for ent in text_doc.ents :
-                    
+                
                     print("OK")
                     print(ent, ent.label_)
                     scoring = 0
                     
                     detectedwords[ent.text] = ent.label_
                     print(detectedwords)
+                    
+                    word = nlp(ent.text)[0]
+                    key = word.lemma_
 
                     if ent.label_ == "Negative":
-                        scoring = negativedic.get(ent.text.lower())
+                        print(ent.text, key)
+
+                        scoring = negativedic.get(key)
                         severetotal = severetotal + scoring
 
                     elif  ent.label_ == "Positive":

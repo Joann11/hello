@@ -11,6 +11,7 @@ from spacy.matcher import PhraseMatcher
 from spacy.pipeline import EntityRuler
 
 
+nlp = spacy.load('en_core_web_sm', disable=['ner']) 
 
 
 def getWordCount(sent):
@@ -34,16 +35,19 @@ def sentenceAnalysis(text):
     for sent in text.sents:
         
         score = 0   
+        key = ""
        
         for ent in sent.ents:
-             
+              
+            word = nlp(ent.text)[0]
+            key = word.lemma_
 
             if ent.label_ == "Negative":
-                   score -= keywords.negativedic.get(ent.text)
+                   score -= keywords.negativedic.get(key)
                    count += 1
                     
             elif  ent.label_ == "Positive":
-                    score += keywords.positivedic.get(ent.text)
+                    score += keywords.positivedic.get(key)
                     count += 1
 
 
@@ -89,7 +93,7 @@ def sentenceAnalysisNew(text):
                                            
 
                         
-def plotGraph(averageC):
+def plotGraphC(averageC):
    
     y = averageC
     x = []

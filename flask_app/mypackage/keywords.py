@@ -6,7 +6,7 @@ from spacy.matcher import Matcher
 from spacy.matcher import PhraseMatcher
 #from spacy import displacy
 
-#nlp = spacy.load('en_core_web_sm', disable=['ner']) 
+nlp = spacy.load('en_core_web_sm', disable=['ner']) 
 
 #matcher = PhraseMatcher(nlp.vocab)
 
@@ -23,10 +23,17 @@ def addnewKeyWordNegative_function(negdicfile):
 
         with open(negdicfile, 'r') as f:
             for line in f:
+                    
+                       
               
                         (key, val) = line.split() 
+                        word = nlp(key)[0]
+                        key = word.lemma_
                         if(negativedic.get(key) is None):
+                            
                          negativedic[key] = int(val)
+
+                         print(key)
             
             
             # for p in negativedic:
@@ -35,12 +42,15 @@ def addnewKeyWordNegative_function(negdicfile):
        
             return negativedic
 
+
 def addnewKeyWordNeu_function(neudicfile):
           with open(neudicfile, 'r') as f:
               for line in f:
                             
-                            (key, val) = line.split()
-                            if(neutraldic.get(key) is None):
+                             (key, val) = line.split() 
+                             word = nlp(key)[0]
+                             key = word.lemma_
+                             if(neutraldic.get(key) is None):
 
                                  neutraldic[key] = int(val)
             #   for p in neutraldic:

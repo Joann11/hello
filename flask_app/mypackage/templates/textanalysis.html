@@ -102,14 +102,6 @@
         {% if token.text in adverbs %}
 
 
-        {% if %}
-        <span class="keyword negativekey" title="Score: {{ negativedictionary[token.text] }}">{{ token.text }}</span>
-        
-        {% elif token.text in posdictionary%}
-        <span class="keyword positivekey" title="Score: {{ posdictionary[token.text] }}">{{ token.text }}</span>
-    
-        {% elif token.dep_ == 'neg'%}
-        <span class="keyword negationSign" title="Found negation">{{ token.text }}</span>
       
 
         {% endif %}

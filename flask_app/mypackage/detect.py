@@ -11,10 +11,10 @@ degreeAdverbs = ['quite','very', 'extremely', 'intensely']
 #return the type of adverb meaning 
 def detect_adverb(text):
 
-    sentences = text
+   
     score = 0
     detectedadverbLists = []
-    for sent in sentences:
+    for sent in text.sents:
      for ent in sent.ents:
         for token in sent:
               for child in token.children:
