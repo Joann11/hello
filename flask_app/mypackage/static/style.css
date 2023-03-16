@@ -82,6 +82,7 @@ body {
     height: 60px;
     width: 100%;
     border: 0;
+    margin-bottom: 5%;
 }
 .navtop div {
     display: flex;
@@ -118,7 +119,14 @@ body.loggedin {
 }
 .content {
     width: 1000px;
-    margin: 10px;
+    margin: auto;
+}
+
+.login form, .register form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 20px;
 }
 .content h2 {
     margin: 0;
@@ -132,6 +140,10 @@ body.loggedin {
     margin: 25px 0;
     padding: 25px;
   background-color: #fff;
+}
+
+.content .login, .content .register {
+  margin: auto !important
 }
 .content > p table td, .content > div table td {
   padding: 5px;

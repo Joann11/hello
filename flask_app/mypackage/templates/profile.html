@@ -9,16 +9,10 @@
     <table>
         <tr>
             <td>Username:</td>
-            <td>{{ account['username'] }}</td>
+            <td>   <h1>Hi, {{ current_user.username }}!</h1>
+                
         </tr>
-        <tr>
-            <td>Password:</td>
-            <td>{{ account['password'] }}</td>
-        </tr>
-        <tr>
-            <td>Email:</td>
-            <td>{{ account['email'] }}</td>
-        </tr>
+      
     </table>
 </div>
 {% endblock %}
