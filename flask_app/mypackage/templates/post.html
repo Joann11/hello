@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% block title %}POST{% endblock %}
+
+{% block content %}
+<form action="{{ url_for("postNow")}}" method="post">
+    <title>Post</title>
+  
+  
+    <label for="positive">Journal</label>
+    <textarea type="text" id="post" name="post" placeholder="Thoughts" >
+    </textarea>
+    <button type="submit" name="pos" value="Submit">Submit</button>
+
+    {% endblock %}

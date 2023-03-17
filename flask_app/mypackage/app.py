@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, session
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re 
+from datetime import datetime
 from plotGraph import *
 from index import *
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
@@ -12,8 +13,8 @@ from flask_babelex import Babel
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
-from flask_bcrypt import Bcrypt
 from http import HTTPStatus
+from flask_bcrypt import Bcrypt
 
 
 # Class-based application configuration
@@ -33,6 +34,9 @@ class ConfigClass(object):
     USER_ENABLE_EMAIL = False        # Enable email authentication
     USER_ENABLE_USERNAME = True    # Disable username authentication
     USER_REQUIRE_RETYPE_PASSWORD = False    # Simplify register form
+    USER_ENABLE_AUTH0 = False
+   
+
 
 
 
@@ -90,11 +94,14 @@ def create_app():
                 # to search case insensitively when USER_IFIND_MODE is 'nocase_collation'.
                 username = db.Column(db.String(100), nullable=False, unique=True)
                 password = db.Column(db.String(255), nullable=False, server_default='')
+                email = db.Column(db.String(255), nullable=False, unique=True)
                 email_confirmed_at = db.Column(db.DateTime())
-
+                
                 # User information
                 first_name = db.Column(db.String(100), nullable=False, server_default='')
                 last_name = db.Column(db.String(100), nullable=False, server_default='')
+                posts = db.relationship('Post', backref='author', lazy=True)
+
 
                   # Define the relationship to Role via UserRoles
                 roles = db.relationship('Role', secondary='user_roles')
@@ -103,7 +110,7 @@ def create_app():
         class Role(db.Model):
             __tablename__ = 'roles'
             id = db.Column(db.Integer(), primary_key=True)
-            role_name = db.Column(db.String(50), unique=True)
+            name = db.Column(db.String(50), unique=True)
 
         # Define the UserRoles association table
         class UserRoles(db.Model):
@@ -112,11 +119,61 @@ def create_app():
             user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
             role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
 
+
+
+            #createUserPost
+
+        class Post(db.Model):
+
+            __tablename__ = 'post'
+            
+            id = db.Column(db.Integer, primary_key=True)
+            text = db.Column(db.String(280))
+            date = db.Column(db.Date)
+            time = db.Column(db.Time)
+            user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    
+
+      
+
+       
+
         # Setup Flask-User and specify the User data-model
         user_manager = UserManager(app, db, User)
             # Create all database tables
         with app.app_context():
             db.create_all()
+
+            # Create 'member@example.com' user with no roles
+            if not User.query.filter(User.email == 'member@example.com').first():
+                user = User(
+                    username = 'testing',
+                    email='member@example.com',
+                    email_confirmed_at=datetime.datetime.utcnow(),
+                    password=user_manager.hash_password('Password1'),
+                )
+                db.session.add(user)
+                db.session.commit()
+
+            # Create 'admin@example.com' user with 'Admin' and 'Agent' roles
+            if not User.query.filter(User.email == 'admin@example.com').first():
+                user = User(
+                    username = 'testingadmin2',
+                    email='admin@example.com',
+                    email_confirmed_at=datetime.datetime.utcnow(),
+                    password=user_manager.hash_password('Password1'),
+                )
+                user.roles.append(Role(name='User'))
+                user.roles.append(Role(name='Professional'))
+                db.session.add(user)
+                db.session.commit()
+                # create a new post associated with the user
+            
+            
+            
+
+            
+        
         
         class RegisterForm(FlaskForm):
             username = StringField(validators=[
@@ -130,7 +187,7 @@ def create_app():
             first_name = StringField(validators=[
                                     InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "First Name"})
             
-            last_name = PasswordField(validators=[
+            last_name = StringField(validators=[
                                     InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Last Name"})
 
             submit = SubmitField('Register')
@@ -157,7 +214,7 @@ def create_app():
         def home():
             return render_template('home.html')
 
-
+        
         @app.route('/login', methods=['GET', 'POST'])
         def login():
             form = LoginForm()
@@ -169,6 +226,28 @@ def create_app():
                         return redirect(url_for('dashboard'))
             return render_template('index.html', form=form)
         
+        
+        @app.route('/post', methods = ['GET', 'POST'])
+        @login_required
+        def postNow():
+               
+            if request.method == "POST":
+
+                if 'post' in request.form:
+            
+                        text = request.form["post"]
+
+                        postNew = Post(text= text, date=datetime.today().date(), time=datetime.now().time(), author= current_user)
+                    
+                        db.session.add(postNew)
+                        db.session.commit()
+
+                return render_template('post.html')
+
+            return render_template('post.html')
+
+
+
        
         @app.route('/dashboard', methods=['GET', 'POST'])
         @login_required
@@ -189,12 +268,17 @@ def create_app():
 
             if form.validate_on_submit():
                 hashed_password = bcrypt.generate_password_hash(form.password.data)
-                new_user = User(username=form.username.data, password=hashed_password, first_name=form.firstname.data, last_name=form.lastname.data, email_confirmed_at = form.email.data)
-                asignrole = UserRoles(user_id =  current_user.user_id, user_roles = 2)
-                db.session.add(asignrole)
+                new_user = User(username=form.username.data, password=hashed_password, first_name=form.firstname.data, last_name=form.lastname.data, email= form.email.data)
+               # asignrole = UserRoles(user_id =  current_user.user_id, role_id = 2)
 
-                db.session.add(new_user)
-                db.session.commit()
+                new_user.roles.append(Role(name = 'professional'))
+                
+                db.session.add(new_user) 
+               
+             
+                db.session.commit() 
+                
+
                 return redirect(url_for('login'))
 
             return render_template('register.html', form=form)
@@ -213,12 +297,13 @@ def create_app():
                 # String-based templates
                 return render_template('main.html')
                    
-
+        
         # The Admin page requires an 'Admin' role.
         @app.route('/admin')
-        @roles_required("professional")    # Use of @roles_required decorator
+        @roles_required("Professional")    # Use of @roles_required decorator
         def admin_page():
                return render_template('textanalysis.html')
+        
 
         # # http://localhost:5000/profile - this will be the profile page, only accessible for loggedin users
         @app.route('/profile')
