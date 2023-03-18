@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for, session
+from flask_socketio import SocketIO
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re 
@@ -15,6 +16,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from http import HTTPStatus
 from flask_bcrypt import Bcrypt
+from sqlalchemy import desc
 
 
 # Class-based application configuration
@@ -48,6 +50,8 @@ def create_app():
     # Flask constructor
         app = Flask(__name__)
         app.config.from_object(__name__+'.ConfigClass')
+        socketio = SocketIO(app)
+
     # Initialize Flask-BabelEx
         babel = Babel(app)
 
@@ -128,9 +132,11 @@ def create_app():
             __tablename__ = 'post'
             
             id = db.Column(db.Integer, primary_key=True)
-            text = db.Column(db.String(280))
+            #alter table Post change text text longtext;
+            text = db.Column(db. String(16000000))
             date = db.Column(db.Date)
             time = db.Column(db.Time)
+            
             user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
     
 
@@ -172,6 +178,11 @@ def create_app():
             
             
 
+        
+        class PostForm(FlaskForm):
+            post = StringField(validators=[
+                                InputRequired(), Length(min=6, max=200000)], render_kw={"placeholder": "Thoughts..."})
+            submit = SubmitField('Post')
             
         
         
@@ -214,6 +225,16 @@ def create_app():
         def home():
             return render_template('home.html')
 
+        def messageReceived(methods=['GET', 'POST']):
+            print('message was received!!!')
+
+        @socketio.on('my event')
+        def handle_my_custom_event(json, methods=['GET', 'POST']):
+            print('received my event: ' + str(json))
+            socketio.emit('my response', json, callback=messageReceived)
+
+        
+
         
         @app.route('/login', methods=['GET', 'POST'])
         def login():
@@ -242,13 +263,37 @@ def create_app():
                         db.session.add(postNew)
                         db.session.commit()
 
-                return render_template('post.html')
+                   
 
-            return render_template('post.html')
+                return render_template('diary.html')
+
+            return render_template('diary.html')
 
 
 
-       
+        @app.route('/diary', methods = ['GET', 'POST'])
+        @login_required
+        def diarypage():
+            if 'post' in request.form:
+            
+                        text = request.form["post"]
+
+                        postNew = Post(text= text, date=datetime.today().date(), time=datetime.now().time(), author= current_user)
+                    
+                        db.session.add(postNew)
+                        db.session.commit()
+
+        
+        
+             
+            posts = db.session.query(Post).order_by(desc(Post.id)).all()
+                            
+                                   
+            return render_template('diary.html', posts = posts)
+          
+                     
+
+
         @app.route('/dashboard', methods=['GET', 'POST'])
         @login_required
         def dashboard():
@@ -743,3 +788,4 @@ def create_app():
 if __name__=='__main__':
     app = create_app()
     app.run()
+    #socketio.run(app, debug=True)
