@@ -5,18 +5,20 @@
 {% block content %}
 	<head>
 		<meta charset="utf-8">
-		<title>Register</title>
+		<title>Admin Register</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
 	</head>
 	<body>
 		<div class="register">
-			<h1>Register</h1>
+			<h1>Admin Register</h1>
 			<div class="links">
-				<a href="{{ url_for('login') }}">Login</a>
-				<a href="{{ url_for('register') }}" class="active">Register</a>
+				<a href="{{ url_for('adminLogin') }}">Admin Login</a>
+				<a href="{{ url_for('adminRegister') }}" class="active">Admin Register</a>
 			</div>
-			<form action="{{ url_for('register') }}" method="post" autocomplete="off">
+			<form action="{{ url_for('adminRegister') }}" method="post" autocomplete="off">
+				{{ form.csrf_token }}
+				
 				
 					<i class="fas fa-user">{{ form.username }}	</i>
 					<i class="fas fa-envelope">{{ form.email }}</i>
@@ -31,7 +33,7 @@
 					{{ form.last_name }}
 
 				
-<a href="{{ url_for('login') }}">Already have an account? Log In</a>
+<a href="{{ url_for('adminLogin') }}">Already have an account? Log In</a>
 	{{ form.submit }}
 			</form>
 		</div>

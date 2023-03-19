@@ -1,0 +1,46 @@
+{% extends 'layout.html' %}
+
+{% block title %}Registration{% endblock %}
+
+{% block content %}
+	<head>
+		<meta charset="utf-8">
+		<title>Register</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+	</head>
+	<body>
+		<div class="register">
+			<h1>Register</h1>
+			<div class="links">
+				<a href="{{ url_for('login') }}">Login</a>
+				<a href="{{ url_for('register') }}" class="active">Register</a>
+			</div>
+			<form action="{{ url_for('register') }}" method="post" autocomplete="off">
+				{{ form.csrf_token }}
+				
+				
+					<i class="fas fa-user">{{ form.username }}	</i>
+					<i class="fas fa-envelope">{{ form.email }}</i>
+				
+					<i class="fas fa-lock">{{ form.password }}</i>
+
+				
+					
+			
+					{{ form.first_name }}
+
+					{{ form.last_name }}
+
+				
+<a href="{{ url_for('login') }}">Already have an account? Log In</a>
+	{{ form.submit }}
+			</form>
+		</div>
+		
+	
+		
+	
+	
+	</body>
+	{% endblock %}

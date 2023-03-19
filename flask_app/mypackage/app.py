@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, flash, redirect, url_for, session
 from flask_socketio import SocketIO
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
@@ -17,6 +17,11 @@ from wtforms.validators import InputRequired, Length, ValidationError
 from http import HTTPStatus
 from flask_bcrypt import Bcrypt
 from sqlalchemy import desc
+from flask_admin import Admin, AdminIndexView
+from flask_admin.contrib.sqla import ModelView
+
+
+
 
 
 # Class-based application configuration
@@ -141,7 +146,7 @@ def create_app():
     
 
       
-
+           
        
 
         # Setup Flask-User and specify the User data-model
@@ -177,6 +182,34 @@ def create_app():
             
             
             
+            
+            class SHModelView(ModelView):
+                     
+                    
+                     def is_accessible(self):
+                        return current_user.is_authenticated
+
+                     def inaccessible_callback(self, name, **kwargs):
+                    # redirect to login page if user doesn't have access
+                        return redirect(url_for('login', next=request.url))
+
+
+        
+            class SHAdminIndexView(AdminIndexView):
+            
+                def is_accessible(self):
+                        return current_user.is_authenticated
+                def inaccessible_callback(self, name, **kwargs):
+                    # redirect to login page if user doesn't have access
+                     return redirect(url_for('login', next=request.url))
+
+
+
+            admin = Admin(app, index_view = SHAdminIndexView()) 
+            admin.add_view(SHModelView(User, db.session))
+            admin.add_view(SHModelView(Post, db.session))
+
+
 
         
         class PostForm(FlaskForm):
@@ -220,7 +253,7 @@ def create_app():
             submit = SubmitField('Login')
 
 
-
+        
         @app.route('/')
         def home():
             return render_template('home.html')
@@ -238,14 +271,25 @@ def create_app():
         
         @app.route('/login', methods=['GET', 'POST'])
         def login():
+
+
             form = LoginForm()
+            print(form.validate_on_submit())
+
+
             if form.validate_on_submit():
+                print("hoy ")
                 user = User.query.filter_by(username=form.username.data).first()
                 if user:
                     if bcrypt.check_password_hash(user.password, form.password.data):
                         login_user(user)
-                        return redirect(url_for('dashboard'))
-            return render_template('index.html', form=form)
+                        return redirect(url_for('diarypage'))
+            else:
+                    flash('You FAILED')
+                    return render_template('flask_user/login.html', form=form)
+        
+
+            return render_template('flask_user/login.html', form=form)
         
         
         @app.route('/post', methods = ['GET', 'POST'])
@@ -290,6 +334,9 @@ def create_app():
                             
                                    
             return render_template('diary.html', posts = posts)
+
+
+        
           
                      
 
@@ -307,16 +354,44 @@ def create_app():
             return redirect(url_for('login'))
 
 
+
+        @ app.route('/adminLogin', methods=['GET', 'POST'])
+        def adminLogin():
+
+            form = LoginForm()
+            print(form.validate_on_submit())
+
+
+            if form.validate_on_submit():
+                
+                user = User.query.filter_by(username=form.username.data).first()
+                if user:
+                    if bcrypt.check_password_hash(user.password, form.password.data):
+                        if user.has_roles('Professional'):
+                            login_user(user)
+                            return render_template('textanalysis.html')
+            else:
+                    flash('You FAILED')
+                    return render_template('adminLogin.html', form=form)
+        
+
+            return render_template('adminLogin.html', form=form)
+        
+           
+
+
+
         @ app.route('/register', methods=['GET', 'POST'])
         def register():
             form = RegisterForm()
 
             if form.validate_on_submit():
                 hashed_password = bcrypt.generate_password_hash(form.password.data)
-                new_user = User(username=form.username.data, password=hashed_password, first_name=form.firstname.data, last_name=form.lastname.data, email= form.email.data)
+                new_user = User(username=form.username.data, password=hashed_password, first_name=form.first_name.data, last_name=form.last_name.data, email= form.email.data)
                # asignrole = UserRoles(user_id =  current_user.user_id, role_id = 2)
+                role = Role.query.filter_by(name='User').one()
 
-                new_user.roles.append(Role(name = 'professional'))
+                new_user.roles.append(role)
                 
                 db.session.add(new_user) 
                
@@ -326,7 +401,32 @@ def create_app():
 
                 return redirect(url_for('login'))
 
-            return render_template('register.html', form=form)
+            return render_template('flask_user/register.html', form=form)
+
+
+
+
+        @ app.route('/adminRegister', methods=['GET', 'POST'])
+        def adminRegister():
+            form = RegisterForm()
+
+            if form.validate_on_submit():
+                hashed_password = bcrypt.generate_password_hash(form.password.data)
+                new_user = User(username=form.username.data, password=hashed_password, first_name=form.first_name.data, last_name=form.last_name.data, email= form.email.data)
+               # asignrole = UserRoles(user_id =  current_user.user_id, role_id = 2)
+                role = Role.query.filter_by(name='Professional').one()
+
+                new_user.roles.append(role)
+                
+                db.session.add(new_user) 
+               
+             
+                db.session.commit() 
+                
+
+                return redirect(url_for('adminLogin'))
+
+            return render_template('adminRegister.html', form=form)
 
 
 
@@ -340,15 +440,22 @@ def create_app():
         @login_required    # User must be authenticated
         def member_page():
                 # String-based templates
-                return render_template('main.html')
+                return render_template('diary.html')
                    
         
         # The Admin page requires an 'Admin' role.
-        @app.route('/admin')
+        @app.route('/admin2')
         @roles_required("Professional")    # Use of @roles_required decorator
         def admin_page():
-               return render_template('textanalysis.html')
+
+            # Flask and Flask-SQLAlchemy initialization here
+
+           
+                return render_template('main.html')
         
+
+
+
 
         # # http://localhost:5000/profile - this will be the profile page, only accessible for loggedin users
         @app.route('/profile')

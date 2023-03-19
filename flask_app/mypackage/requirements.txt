@@ -1,10 +1,18 @@
-spacv==0.0.22
-spacy==3.5.1
-spacy-legacy==3.0.12
-spacy-loggers==1.0.4
-mysqlclient==2.1.1
 Flask==2.2.3
-Flask-MySQLdb==1.0.1
-en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl
-Faker==17.6.0
-Babel==2.9.1
+flask_babelex==0.9.4
+flask_bcrypt==1.0.1
+flask_login==0.6.2
+flask_mysqldb==1.0.1
+flask_socketio==5.3.3
+flask_sqlalchemy==3.0.3
+flask_user==1.0.2.2
+flask_wtf==1.1.1
+HTMLParser==0.0.2
+MarkupSafe==1.1.1
+matplotlib==3.7.1
+numpy==1.20.1
+Pillow==9.4.0
+protobuf==4.22.1
+spacy==3.5.1
+SQLAlchemy==2.0.6
+WTForms==3.0.1
