@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+{% extends 'layout.html' %}
+{% block title %}professionaldashboard{% endblock %}
+
+{% block content %}
+
+<div class = "content">
+    <table>
+        <tr>
+            <th>Users</th>
+          </tr>
+      
+
+    {%for user in users%}
+    <tr>
+       <td> <a href="{{ url_for('profilebackend' , username=user.username) }}">  {{user.username}}</a> </td>
+      </tr>
+    {% endfor %}
+</div>
+{% endblock %}
+</html>

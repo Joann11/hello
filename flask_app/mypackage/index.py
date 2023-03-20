@@ -18,7 +18,6 @@ from spacy.pipeline import EntityRuler
 from spacy.tokens import Token #import Token class from spacy
 from jinja2 import Template
 from flask import render_template
-from faker import Faker
 
 #from spacy import displacy
 

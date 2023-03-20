@@ -24,7 +24,7 @@ from flask_admin.contrib.sqla import ModelView
 
 
 
-# Class-based application configuration
+# Class-based application configurationcd
 class ConfigClass(object):
     """ Flask application config """
 
@@ -109,8 +109,10 @@ def create_app():
                 # User information
                 first_name = db.Column(db.String(100), nullable=False, server_default='')
                 last_name = db.Column(db.String(100), nullable=False, server_default='')
+                
                 posts = db.relationship('Post', backref='author', lazy=True)
 
+                score = db.relationship('Score', backref='user', uselist=False, lazy=True)
 
                   # Define the relationship to Role via UserRoles
                 roles = db.relationship('Role', secondary='user_roles')
@@ -143,6 +145,17 @@ def create_app():
             time = db.Column(db.Time)
             
             user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+        
+        
+        class Score(db.Model):
+
+            __tablename__ = 'score'
+            
+            id = db.Column(db.Integer, primary_key=True)
+            value = db.Column(db.Integer)
+            user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    
+    
     
 
       
@@ -176,6 +189,9 @@ def create_app():
                 )
                 user.roles.append(Role(name='User'))
                 user.roles.append(Role(name='Professional'))
+                user.score.append(Score(value = 0))
+                user.score.append(Score(value = 0))
+             
                 db.session.add(user)
                 db.session.commit()
                 # create a new post associated with the user
@@ -335,6 +351,8 @@ def create_app():
                                    
             return render_template('diary.html', posts = posts)
 
+   
+
 
         
           
@@ -369,7 +387,7 @@ def create_app():
                     if bcrypt.check_password_hash(user.password, form.password.data):
                         if user.has_roles('Professional'):
                             login_user(user)
-                            return render_template('textanalysis.html')
+                            return render_template('profilebackend.html')
             else:
                     flash('You FAILED')
                     return render_template('adminLogin.html', form=form)
@@ -391,7 +409,10 @@ def create_app():
                # asignrole = UserRoles(user_id =  current_user.user_id, role_id = 2)
                 role = Role.query.filter_by(name='User').one()
 
+
                 new_user.roles.append(role)
+                new_user.score.append(Score(value = 0))
+             
                 
                 db.session.add(new_user) 
                
@@ -452,7 +473,39 @@ def create_app():
 
            
                 return render_template('main.html')
+  
+
+ 
+        @app.route('/profilebackend/<username>')
         
+        def profilebackend(username):
+
+            user = User.query.filter_by(username=username).first()
+            posts = db.session.query(Post).filter_by(author=user).all()
+
+
+            
+                            
+                                   
+            return render_template('profilebackend.html', posts = posts, username = username)
+     
+
+
+
+
+
+
+        @app.route('/professionaldashboard')
+        # @login_required
+        # @roles_required
+        def professionaldashboard():
+
+            users = db.session.query(User).all()
+
+            return render_template('professionaldashboard.html', users = users)
+
+     
+
 
 
 
@@ -579,7 +632,12 @@ def create_app():
                 return render_template("keyword.html", result = result)
             
 
-            
+        
+
+
+
+
+
         @app.route('/evaluation', methods=['GET', 'POST'])
         def analyze():
                 if request.method == "POST":
