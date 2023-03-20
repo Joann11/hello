@@ -483,14 +483,35 @@ def create_app():
             user = User.query.filter_by(username=username).first()
             posts = db.session.query(Post).filter_by(author=user).all()
 
-
-            
-                            
-                                   
             return render_template('profilebackend.html', posts = posts, username = username)
-     
+
+         
+        def postanalyze(postid):
+                
+                
+                    post = Post.query.get(postid)
+                    input_text = post.text
+
+                    f = open("example.txt", "w")
+                    f.write(input_text)
+                    # f.write(t)
+                    f.close()
+                    textP = input_text
+                    calculatescore_function()
+                    sentences = list(getText().sents)
+                    keywords = list(detectedwords.keys())
+                    negativedictionary = negativedic
+                    posdictionary = positivedic
 
 
+                    
+                    c = plotGraph.sentenceAnalysis(getText())
+                    graphP = plotGraph.plotGraphC(c)
+
+                   
+                    return render_template('profilebackend.html', textP = textP, sentences = sentences, keywords = keywords, negativedictionary = negativedictionary, posdictionary = posdictionary, graphP = graphP)
+
+                
 
 
 
