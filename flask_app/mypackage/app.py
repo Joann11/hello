@@ -19,6 +19,7 @@ from flask_bcrypt import Bcrypt
 from sqlalchemy import desc
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
+from flask import jsonify
 
 
 
@@ -485,10 +486,12 @@ def create_app():
 
             return render_template('profilebackend.html', posts = posts, username = username)
 
-         
-        def postanalyze(postid):
+
+        @app.route('/profilebackend', methods=['POST'] )
+        
+        def postanalyze():
                 
-                
+                    postid = request.form['post_id']
                     post = Post.query.get(postid)
                     input_text = post.text
 
@@ -508,7 +511,6 @@ def create_app():
                     c = plotGraph.sentenceAnalysis(getText())
                     graphP = plotGraph.plotGraphC(c)
 
-                   
                     return render_template('profilebackend.html', textP = textP, sentences = sentences, keywords = keywords, negativedictionary = negativedictionary, posdictionary = posdictionary, graphP = graphP)
 
                 
