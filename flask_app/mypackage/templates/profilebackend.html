@@ -98,17 +98,31 @@
             eventClick:  function(arg) {
              // arg.jsEvent.preventDefault(); 
              $.ajax({
-                url: '/profilebackend',
+                url: "postanalyze",
                 type: 'POST',
                 data: {'post_id': arg.event.id},
                 success: function(response) {
+                  console.log(response.sentences)
 
-                          $('#modalTitle').html(arg.event.start);
-                    //$('#modalBody').html(arg.event.title);
+                   $('#calendarModal').modal();
+                    $('#modalTitle').html(arg.event.start);
+                    //$('#modalBody').html(response.data);
+                  
                     //$('#eventUrl').attr('href',event.url);
-                    
+                    // var data = response.data; // access the data variable
+                    // var sentences = response.sentences;
+                    // var sentenceList = $('#sentenceList');
+                    //          sentenceList.empty();
+                    //          sentences.forEach(function(sentence) {
+                    //            sentenceList.append(sentence);
+                          
+                    //          });
+                    // var sentences = data.sentences;
+                    // var keywords = data.keywords;
+                    // var negativedictionary = data.negativedictionary;
+                    // var posdictionary = data.posdictionary;
+                    // var graph = data.graph;
 
-                          $('#calendarModal').modal();
                             // ... show the response data in a modal ...
                 },
                 error: function(xhr, status, error) {
@@ -145,12 +159,16 @@
               
               <h3>Post Analysis</h3>
             
-             <p><b>Input text:</b>
-              
+             <p><b>Input text:</b><span id = "sentenceList"></span>
+              {% if data %}
+    <!-- display data here -->
+{% else %}
+    <!-- handle case when data is undefined -->
+{% endif %}
               </p>
               <hr>
-              <h2 >Sentences: {{text}}</h2>
-              <div>
+              <h2 >Sentences:  </h2>
+             <div>
              
               {% for sent in sentences %}
               <span class = "perSentence">
@@ -220,6 +238,6 @@
     </div>
     </div>
   </body>
-</html>
-
 {% endblock %}
+
+</html>

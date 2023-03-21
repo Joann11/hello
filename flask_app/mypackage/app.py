@@ -475,8 +475,7 @@ def create_app():
            
                 return render_template('main.html')
   
-
- 
+     
         @app.route('/profilebackend/<username>')
         
         def profilebackend(username):
@@ -484,12 +483,12 @@ def create_app():
             user = User.query.filter_by(username=username).first()
             posts = db.session.query(Post).filter_by(author=user).all()
 
+
             return render_template('profilebackend.html', posts = posts, username = username)
 
-
-        @app.route('/profilebackend', methods=['POST'] )
+        @app.route('/profilebackend/<username>', methods=['POST'] )
         
-        def postanalyze():
+        def postanalyze(username):
                 
                     postid = request.form['post_id']
                     post = Post.query.get(postid)
@@ -499,20 +498,38 @@ def create_app():
                     f.write(input_text)
                     # f.write(t)
                     f.close()
+                    
+                    
                     textP = input_text
                     calculatescore_function()
                     sentences = list(getText().sents)
                     keywords = list(detectedwords.keys())
                     negativedictionary = negativedic
                     posdictionary = positivedic
-
-
                     
                     c = plotGraph.sentenceAnalysis(getText())
                     graphP = plotGraph.plotGraphC(c)
 
-                    return render_template('profilebackend.html', textP = textP, sentences = sentences, keywords = keywords, negativedictionary = negativedictionary, posdictionary = posdictionary, graphP = graphP)
+                    sentences = list(getText().sents)
+                    sentences_list = [str(s) for s in sentences]
+                     # your code here
+                    data = {
+                        'sentences': sentences_list,
+                        'keywords': keywords,
+                        'negativedictionary': negativedictionary,
+                        'posdictionary': posdictionary,
+                        'graph': graphP
+                    }
 
+                    user = User.query.filter_by(username=username).first()
+                    posts = db.session.query(Post).filter_by(author=user).all()
+
+                    print(data)
+                    
+                    return render_template('profilebackend.html', data=data, posts=posts, username=username)
+
+ 
+      
                 
 
 
