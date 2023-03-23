@@ -20,6 +20,7 @@ from sqlalchemy import desc
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask import jsonify
+import json
 
 
 
@@ -489,7 +490,9 @@ def create_app():
         @app.route('/profilebackend/<username>', methods=['POST'] )
         
         def postanalyze(username):
+                  if request.method == "POST":
                 
+              
                     postid = request.form['post_id']
                     post = Post.query.get(postid)
                     input_text = post.text
@@ -523,10 +526,10 @@ def create_app():
 
                     user = User.query.filter_by(username=username).first()
                     posts = db.session.query(Post).filter_by(author=user).all()
-
+                    
                     print(data)
                     
-                    return render_template('profilebackend.html', data=data, posts=posts, username=username)
+                    return jsonify(data)
 
  
       

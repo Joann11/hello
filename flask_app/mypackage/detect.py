@@ -1,10 +1,11 @@
 
 import re
-import spacy
+import spacy 
 from spacy.symbols import ORTH
 from spacy.matcher import Matcher
 from spacy.matcher import PhraseMatcher
 
+nlp = spacy.load('en_core_web_sm')
 
 degreeAdverbs = ['quite','very', 'extremely', 'intensely']
 
@@ -48,16 +49,60 @@ def detect_adverb(text):
 
     return detectedadverbLists
 
-def detectpersonalpronounce(text):
+def detectpersonalpronoun(text):
+     
+     
      temp = 0
      text_doc = text
-    #detect personal pronounce
-     for token in text_doc:
-
-                if token.text.lower() == "i" or token.text.lower() == "me" or token.text.lower() == "myself":
-                    print(token.text.lower())
-                    temp = 1
-                    return temp
+     sub = ""
     
-     return temp
+     subject = None
+     for token in text_doc:
+        if token.dep_ == 'nsubj':
+            subject = (token.text).lower()
+            break
+       
+     if subject:
+            if subject == "she" or subject == "he" or subject == "her" or subject == "him" or subject == "they" or subject == "them":
+                sub = "thirdperson"
+                
+            elif  subject == "i" or subject == "me" or subject == "myself" :
+                 sub = "firstperson"
+
+            print("The subject of the sentence is " + subject)
+     else:
+            print("Could not identify the subject of the sentence")
+        
+
+     for sent in text_doc.sents:
+                
+                for ent in sent.ents:
+                    print("hello")
+                    for token in sent:
+                    
+                        for child in token.children:
+                    
+                            if child.pos_ == 'PRON' and child.dep_ == 'nsubj' and child.text == subject:
+                                    print(token.text, 'is attached to the subject:', subject)
+                            else:
+                                    print(child.pos_)
+        
+    
+   
+    
+     return sub
             
+
+
+    
+
+
+ #detect personal pronounce
+    #  for token in text_doc:
+
+    #             if token.text.lower() == "i" or token.text.lower() == "me" or token.text.lower() == "myself":
+    #                 print(token.text.lower())
+    #                 temp = 1
+    #                 return temp
+
+                

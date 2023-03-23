@@ -223,25 +223,32 @@ def totalScore(text, severetotal, positivetotal):
         totalscore += adscore
      else : 
         totalscore -= adscore 
-     return totalscore
+      
+     return float(totalscore)
 
-def totalScorePersonalPronoun(totalscore):
-    #check for no pronoun, personal, or third person 
-    #https://arxiv.org/pdf/2009.08560.pdf split and rephrase research
-    temp = detect.detectpersonalpronoun(getText())
 
-    if temp == "personal":
-        totalscore * 2
-    elif temp == "third":
-        totalscore * 1.5
-    else :
-        totalscore
-    
     #ddoc :https://subscription.packtpub.com/book/data/9781838987312/2/ch02lvl1sec13/splitting-sentences-into-clauses
 
 
 
+def totalScorePersonalPronoun(totalscore):
+    #check for no pronoun, personal, or third person 
+    #https://arxiv.org/pdf/2009.08560.pdf split and rephrase research
+    sub = detect.detectpersonalpronoun(getText())
+    print(sub)
+    temp = 0
+    totalscore = float(totalscore)
+    if sub == "firstperson":
+        temp = totalscore * 2
+    elif sub == "thirdperson":
+        temp = totalscore * 1.5
+    else :
+        temp = totalscore
+    
 
+    print("result"+ sub, temp)
+    return temp
+  
 
 
 def totalScoreComment(totalscore, positivetotal, severetotal, neu):
@@ -274,7 +281,7 @@ def totalScoreComment(totalscore, positivetotal, severetotal, neu):
 def totalscorePronounce(severetotal, positivetotal):
             comment = ""
             #total analysis with personal pronounce analysed
-            temp = detect.detectpersonalpronounce(getText())
+            temp = detect.detectpersonalpronoun(getText())
             if( temp > 0):
             
                     totalscore =  positivetotal - severetotal - temp
@@ -461,9 +468,11 @@ def calculatescore_function():
         # for sent in text_doc.sents:
         
         #     for ent in sent.ents:
-      #  lemma = [token.lemma_ for token in text_doc]
-      #  text_doc = ' '.join(lemma)
-     #   text_doc = nlp(text_doc)
+
+        lemma = [token.lemma_ for token in text_doc]
+        text_doc = ' '.join(lemma)
+        text_doc = nlp(text_doc)
+        print(text_doc)
         key = ""
         for ent in text_doc.ents :
                 
@@ -575,7 +584,7 @@ def calculatescore_function():
                     #total analysis 
                     totalscore = totalScore(text_doc, severetotal, positivetotal)
                     comment = totalScoreComment(totalscore,positivetotal, severetotal, neu)
-                    commentP =  totalscorePronounce(severetotal, positivetotal)
+                    commentP =  str(totalScorePersonalPronoun(totalscore))
 
                 
         count = str(plotGraph.sentenceAnalysis(text_doc))
