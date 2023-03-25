@@ -1,2 +1,2 @@
-"# hello" 
-"# hello" 
+pip install flask pip install flask_socketio pip install flask_mysqldb pip install  datetime  pip install flask_login pip install flask_sqlalchemy pip install flask_user pip install flask_babelex pip install flask_wtf pip install wtforms pip install  wtforms.validators pip install flask_bcrypt pip install sqlalchemy pip install flask_admin pip install spacy pip install matplotlib pip install email_validator
+python -m spacy download en_core_web_sm 
