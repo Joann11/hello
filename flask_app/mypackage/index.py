@@ -18,10 +18,11 @@ from spacy.pipeline import EntityRuler
 from spacy.tokens import Token #import Token class from spacy
 from jinja2 import Template
 from flask import render_template
-
 #from spacy import displacy
 
 nlp = spacy.load('en_core_web_sm', disable=['ner']) 
+
+
 matcher = PhraseMatcher(nlp.vocab)
 neutraldic = keywords.addnewKeyWordNeu_function(neudicfile)
 negativedic = keywords.addnewKeyWordNegative_function(negdicfile)
@@ -34,7 +35,6 @@ def getText():
     text = open(filename, "r").read()
     text_doc = nlp(text)
     return text_doc
-
 
 
 def set_score(doc):
@@ -313,7 +313,7 @@ nlpSetRule()
 
 def createWordTable():
     strW = "" 
-    text_doc = getText()    
+    text_doc = getText()
 
     scoring = 0
     strW += "<table>"
@@ -450,158 +450,227 @@ def calculatescore_function():
         #findkeywords
         
        
-        severetotal = 0
-        positivetotal = 0
-        text_doc = getText()
-        
-        #sentences = [sent.text for sent in text_doc.sents]
+            severetotal = 0
+            positivetotal = 0
+            text_doc = getText()
+            
+            #sentences = [sent.text for sent in text_doc.sents]
 
-        print(text_doc)
-        negationcomment = ""
-        comment = ""
-        neu = 0
-        commentP = ""
-        result = ""
-        scores = []
-        # Process each sentence separately
+            print(text_doc)
+            negationcomment = ""
+            comment = ""
+            neu = 0
+            commentP = ""
+            result = ""
+            scores = []
+            # Process each sentence separately
 
-        # for sent in text_doc.sents:
-        
-        #     for ent in sent.ents:
+            # for sent in text_doc.sents:
+            
+            #     for ent in sent.ents:
 
-        lemma = [token.lemma_ for token in text_doc]
-        text_doc = ' '.join(lemma)
-        text_doc = nlp(text_doc)
-        print(text_doc)
-        key = ""
-        for ent in text_doc.ents :
-                
-                    print("OK")
-                    print(ent, ent.label_)
-                    scoring = 0
-                    
-                    detectedwords[ent.text] = ent.label_
-                    print(detectedwords)
-                    
-                    word = nlp(ent.text)[0]
-                    key = word.lemma_
+            lemma = [token.lemma_ for token in text_doc]
+            text_doc = ' '.join(lemma)
+            text_doc = nlp(text_doc)
+            print(text_doc)
+            key = ""
+            for ent in text_doc.ents :
+                        
+                                    print("OK")
+                                    print(ent, ent.label_)
+                                    scoring = 0
+                                    
+                                    detectedwords[ent.text] = ent.label_
+                                    print(detectedwords)
+                                    
+                                    word = nlp(ent.text)[0]
+                                    key = word.lemma_
 
-                    if ent.label_ == "Negative":
-                        print(ent.text, key)
+                                    if ent.label_ == "Negative":
+                                        print(ent.text, key)
+                                        scoring = negativedic.get(key)
+                                        severetotal = severetotal + scoring
 
-                        scoring = negativedic.get(key)
-                        severetotal = severetotal + scoring
+                                    elif  ent.label_ == "Positive":
+                                        scoring = positivedic.get(ent.text.lower())
+                                        positivetotal = positivetotal + scoring
 
-                    elif  ent.label_ == "Positive":
-                        scoring = positivedic.get(ent.text.lower())
-                        positivetotal = positivetotal + scoring
+                                    elif  ent.label_ == "Neutral":
+                                        neu = neu + 1
+                                    
 
-                    elif  ent.label_ == "Neutral":
-                        neu = neu + 1
-                    
+                                    for token in text_doc:
+                                            if token.dep_ == 'neg':
 
-                 
+                                                # Apply negation detection to this entity
+                                                    negationcomment, severetotal, positivetotal = detect.detect_negation(token, ent, detectedwords, scoring, severetotal, positivetotal)
+                                                
+                                           #total analysis 
+                                            
+                                       
                             
-                    for token in text_doc:
-                    #if there is a negation such as 'not' in the text phrase
-                        if token.dep_ == 'neg':
-                            detectedwords[token.text] =  token.dep_
-                            print ("Token dep" +token.dep_)
+                                    totalscore = totalScore(text_doc, severetotal, positivetotal)
+                                    comment = totalScoreComment(totalscore,positivetotal, severetotal, neu)
+                                    commentP =  str(totalScorePersonalPronoun(totalscore))
+
+                                        
+            count = str(plotGraph.sentenceAnalysis(text_doc))
+                    
+            #p,n,c = sentenceAnalysis()
+            #  plotGraph(p,n,c)
+
+            if not detectedwords:
+                            result = "no word detected" + count 
+            else:    
+                            result = comment +"<br>"+ negationcomment+ "<br>"+ commentP +"<br>"+ count 
+
+            return result
+
+            
+print(str(calculatescore_function()))
+
+
+
+
+
+
+# def calculatescore_function_OLD():
+#         #findkeywords
+        
+       
+#         severetotal = 0
+#         positivetotal = 0
+#         text_doc = getText()
+        
+#         #sentences = [sent.text for sent in text_doc.sents]
+
+#         print(text_doc)
+#         negationcomment = ""
+#         comment = ""
+#         neu = 0
+#         commentP = ""
+#         result = ""
+#         scores = []
+#         # Process each sentence separately
+
+#         # for sent in text_doc.sents:
+        
+#         #     for ent in sent.ents:
+
+#         lemma = [token.lemma_ for token in text_doc]
+#         text_doc = ' '.join(lemma)
+#         text_doc = nlp(text_doc)
+#         print(text_doc)
+#         key = ""
+#         for ent in text_doc.ents :
+                    
+
+
+
+
+#                     for token in text_doc:
+#                     #if there is a negation such as 'not' in the text phrase
+#                         if token.dep_ == 'neg':
+#                             detectedwords[token.text] =  token.dep_
+#                             print ("Token dep" +token.dep_)
 
                         
-                            action = token.head.text
-                            #find the dependecy of this negation. 
-                            print("NOT WRONG")
-                            print(token.head.text, token, ent.text)
+#                             action = token.head.text
+#                             #find the dependecy of this negation. 
+#                             print("NOT WRONG")
+#                             print(token.head.text, token, ent.text)
                                 
-                            #if it is a keyword then the idea is inverted like 'not depressed'
-                            if ent.text == action and ent.label_ == "Negative":
-                                    print("Found negation to keyword Negative " + token.text)
-                                    print(token.head.text, token)
-                                    #negativedic.get(ent.text.lower())
-                                #severe of depression deducted but positive will not be changed. Take it as neutral. 
-                                    #severetotal = severetotal - negativedic.get(ent.text.lower())
-                                    severetotal = severetotal - scoring
-                                    print(severetotal)
-                                    negationcomment += "Total Negative Score decreased by" + str(positivedic.get(ent.text.lower())) +"because"
+#                             #if it is a keyword then the idea is inverted like 'not depressed'
+#                             if ent.text == action and ent.label_ == "Negative":
+#                                     print("Found negation to keyword Negative " + token.text)
+#                                     print(token.head.text, token)
+#                                     #negativedic.get(ent.text.lower())
+#                                 #severe of depression deducted but positive will not be changed. Take it as neutral. 
+#                                     #severetotal = severetotal - negativedic.get(ent.text.lower())
+#                                     severetotal = severetotal - scoring
+#                                     print(severetotal)
+#                                     negationcomment += "Total Negative Score decreased by" + str(positivedic.get(ent.text.lower())) +"because"
                                     
                                                     
-                            #if is not happy inverted positive to negative
-                            elif ent.text == action and ent.label_ == "Positive":
-                                    positivetotal = positivetotal - positivedic.get(ent.text.lower())
-                                    severetotal = severetotal + positivedic.get(ent.text.lower())
-                                    print(severetotal)
+#                             #if is not happy inverted positive to negative
+#                             elif ent.text == action and ent.label_ == "Positive":
+#                                     positivetotal = positivetotal - positivedic.get(ent.text.lower())
+#                                     severetotal = severetotal + positivedic.get(ent.text.lower())
+#                                     print(severetotal)
                                 
-                                #severe of negative increased and positive deducted.
+#                                 #severe of negative increased and positive deducted.
                                     
-                                    print("Found negation to keyword Positive hi " + token.text)
-                                    print(token.head.text, token)
-                                    negationcomment += "Total Negative Score increased by" + str(positivedic.get(ent.text.lower())) +"because"
+#                                     print("Found negation to keyword Positive hi " + token.text)
+#                                     print(token.head.text, token)
+#                                     negationcomment += "Total Negative Score increased by" + str(positivedic.get(ent.text.lower())) +"because"
 
                                                 
-                            #         #if the negation is not dependent on the keywords such as 'want' or 'hope', search for keyword within the subtree
+#                             #         #if the negation is not dependent on the keywords such as 'want' or 'hope', search for keyword within the subtree
                             
-                            else:
-                                    substuff = list(token.head.rights)
+#                             else:
+#                                     substuff = list(token.head.rights)
                                     
-                                    #FIND AUX IN THE SUB TREE SUCH AS BE, HAS DONE, WILL DO, SHOULD DO
-                                    if(len(substuff) > 0 and substuff[0].pos_ == 'AUX' ):
-                                        print("FOUND AUX")
-                                        t = substuff[0] 
-                                        substuff = list(t.rights)
-                                        print(str(substuff))
+#                                     #FIND AUX IN THE SUB TREE SUCH AS BE, HAS DONE, WILL DO, SHOULD DO
+#                                     if(len(substuff) > 0 and substuff[0].pos_ == 'AUX' ):
+#                                         print("FOUND AUX")
+#                                         t = substuff[0] 
+#                                         substuff = list(t.rights)
+#                                         print(str(substuff))
                                     
-                                    for k in substuff:
-                                        if ent.text == k.text :
+#                                     for k in substuff:
+#                                         if ent.text == k.text :
                                             
-                                                if(ent.label_ == "Positive"):
+#                                                 if(ent.label_ == "Positive"):
                                                 
 
-                                                    negationcomment += "Total Negative Score increased by" + str(positivedic.get(ent.text.lower())) +"because"
+#                                                     negationcomment += "Total Negative Score increased by" + str(positivedic.get(ent.text.lower())) +"because"
 
-                                                    severetotal = severetotal + positivedic.get(ent.text.lower())
-                                                    positivetotal = positivetotal - positivedic.get(ent.text.lower())
-                                                print("Found negation " + token.text+ ent.text)
-                                                if(ent.label_ == "Negative"):
+#                                                     severetotal = severetotal + positivedic.get(ent.text.lower())
+#                                                     positivetotal = positivetotal - positivedic.get(ent.text.lower())
+#                                                 print("Found negation " + token.text+ ent.text)
+#                                                 if(ent.label_ == "Negative"):
                 
-                                                    negationcomment += "Total Ngative Score decreased by" + str(negativedic.get(ent.text.lower())) +"because"
-                                                    severetotal = severetotal - negativedic.get(ent.text.lower())
+#                                                     negationcomment += "Total Ngative Score decreased by" + str(negativedic.get(ent.text.lower())) +"because"
+#                                                     severetotal = severetotal - negativedic.get(ent.text.lower())
                                             
-                                                print("Found negation " + token.text+ ent.text)
-                            negationcomment += "Found negation: " + token.text +" to keyword "+ ent.label_ + " :"+ ent.text
+#                                                 print("Found negation " + token.text+ ent.text)
+#                             negationcomment += "Found negation: " + token.text +" to keyword "+ ent.label_ + " :"+ ent.text
                             
                     
-                    # scores.append(positivetotal - severetotal)
-                    # positivetotal = 0
-                    # severetotal = 0
+#                     scores.append(positivetotal - severetotal)
+#                     positivetotal = 0
+#                     severetotal = 0
 
         
                             
                         
                         
                    
-                #  print("score" + str(plotEachSentence(ent)))
-                    #total analysis 
-                    totalscore = totalScore(text_doc, severetotal, positivetotal)
-                    comment = totalScoreComment(totalscore,positivetotal, severetotal, neu)
-                    commentP =  str(totalScorePersonalPronoun(totalscore))
+#                     #print("score" + str(plotEachSentence(ent)))
+#                     #total analysis 
+#                     totalscore = totalScore(text_doc, severetotal, positivetotal)
+#                     comment = totalScoreComment(totalscore,positivetotal, severetotal, neu)
+#                     commentP =  str(totalScorePersonalPronoun(totalscore))
 
                 
-        count = str(plotGraph.sentenceAnalysis(text_doc))
+#         count = str(plotGraph.sentenceAnalysis(text_doc))
                 
-        #p,n,c = sentenceAnalysis()
-        #  plotGraph(p,n,c)
+#         #p,n,c = sentenceAnalysis()
+#         #  plotGraph(p,n,c)
 
-        if not detectedwords:
-                result = "no word detected" + count 
-        else:    
-                result = comment + negationcomment+ commentP + count 
+#         if not detectedwords:
+#                 result = "no word detected" + count 
+#         else:    
+#                 result = comment + negationcomment+ commentP + count 
 
-        return result
+#         return result
 
             
 
-print(str(calculatescore_function()))
+# print(str(calculatescore_function_OLD()))
+
+
+
 
 
                         #if the negation is not dependent on the keywords such as 'want' or 'hope', search for keyword within the subtree

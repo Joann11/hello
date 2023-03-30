@@ -145,7 +145,6 @@ def create_app():
             text = db.Column(db. String(16000000))
             date = db.Column(db.Date)
             time = db.Column(db.Time)
-            
             user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
         
         
@@ -158,7 +157,17 @@ def create_app():
             user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
     
     
+        class PostScore(db.Model):
+
+            __tablename__ = 'postscore'
+            
+            id = db.Column(db.Integer, primary_key=True)
+            value = db.Column(db.Integer)
+            post_id = db.Column(db.Integer(), db.ForeignKey('post.id'))
     
+    
+    
+
 
       
            
@@ -564,10 +573,9 @@ def create_app():
                 
                 return render_template('profile.html')
         
-        @app.route('/', methods =["GET", "POST"])
+        @app.route('/main', methods =["GET", "POST"])
         def gfg():
             if request.method == "POST":
-
 
                 if 'test' in request.form:
                  #for testing 
