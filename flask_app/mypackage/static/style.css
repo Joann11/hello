@@ -165,6 +165,18 @@ body.loggedin {
 .positiveWord{
     background-color: green !important;
 }
+.negativeWord{
+    background-color: yellow !important;
+}
+
+.pronoun{
+	background-color: #2868c7 !important;
+}
+
+.firstpronoun{
+    background-color: plum !important;
+}
+
 
 table, th, td {
     border:1px solid black;

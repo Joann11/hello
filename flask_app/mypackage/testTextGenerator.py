@@ -6,16 +6,20 @@ from spacy.symbols import ORTH
 from spacy.matcher import Matcher
 from spacy.matcher import PhraseMatcher
 import random
+import keywords
 
 from random import randint
+negativedic = keywords.negativedic
+positivedic = keywords.positivedic
+neutraldic =  keywords.neutraldic
 
 
-def generaterandomSentTest(dictionaryFile):
+def generaterandomSentTest(keywordtype):
       # Declaring names, verbs and nouns
         names=["You","I","They","He","She","Robert","Steve"]
         verbs=["was", "is", "are", "were"]
         nouns=["playing cricket.", "watching television.", "singing.", "fighting.", "cycling."]
-        negsent = dictionaryFile
+        negsent = negativedic
         sent = ""
         t = random.randint(0,10)
         for x in range(t):

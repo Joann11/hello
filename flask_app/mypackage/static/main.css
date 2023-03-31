@@ -12,9 +12,14 @@
 .content {
     width: 1000px;
     margin: auto;
-	background-color: aliceblue;
 }
 
+@media screen and (min-width: 1201px){
+#content {
+    padding: 3em 5em 8em 5em;
+    margin-left: 12em Im !important;
+}
+}
 
 .addPost{
 
@@ -2298,6 +2303,7 @@ input, select, textarea {
 			}
 
 	#sidebar {
+		position: fixed ;
 		color: rgba(255, 255, 255, 0.55);
 		text-shadow: -1px -1px 0px rgba(0, 0, 0, 0.5);
 		width: 14em;

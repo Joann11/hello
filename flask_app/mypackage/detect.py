@@ -63,41 +63,37 @@ def detectpersonalpronoun(text):
      temp = 0
      text_doc = text
      sub = ""
-    
      subject = None
-     for token in text_doc:
-        if token.dep_ == 'nsubj':
-            subject = (token.text).lower()
-            break
        
-     if subject:
-            if subject == "she" or subject == "he" or subject == "her" or subject == "him" or subject == "they" or subject == "them":
-                sub = "thirdperson"
-                
-            elif subject == "you":
-                sub = "secondperson"
-
-            elif  subject == "i" or subject == "me" or subject == "myself" :
-                 sub = "firstperson"
-            
-            elif subject == "we" or subject == "us":
-                sub = "firstpersonplural"
-            
-
-            print("The subject of the sentence is " + subject)
-     else:
-            print("Could not identify the subject of the sentence")
-        
-
      for sent in text_doc.sents:
-                
+               
+                                
                 for ent in sent.ents:
                     for token in sent:
-                    
+                        
                         for child in token.children:
-                    
-                            if child.pos_ == 'PRON' and child.dep_ == 'nsubj' and child.text == subject:
-                                    print(token.text, 'is attached to the subject:', subject)
+                            print("sign"+child.text)
+                            if child.pos_ == 'PRON' and child.dep_ == 'nsubj':
+                                        subject = child.text.lower()
+                                        
+                                        if subject == "she" or subject == "he" or subject == "her" or subject == "him" or subject == "they" or subject == "them":
+                                            sub = "thirdperson"
+                                            
+                                        elif subject == "you":
+                                            sub = "secondperson"
+
+                                        elif  subject == "i" or subject == "me" or subject == "myself" :
+                                            sub = "firstperson"
+                                        
+                                        elif subject == "we" or subject == "us":
+                                            sub = "firstpersonplural"
+                                        
+
+                                        print("The subject of the sentence is " + subject)
+                                
+
+                                        print(token.text, 'is attached to the subject:', subject)
+
                             else:
                                     print(child.pos_)
    
@@ -108,19 +104,22 @@ def detectpersonalpronoun(text):
 def detect_negation(token, ent, detectedwords, scoring, severetotal, positivetotal):
    
    
-            detectedwords[token.text] =  token.dep_
+            detectedwords[token.text.lower()] =  token.dep_
             print("Token dep" + token.dep_)
             
             action = token.head.text
             print("NOT WRONG")
             print(token.head.text, token, ent.text)
-                   
+            negationcomment = "" 
+        
             #if it is a keyword then the idea is inverted like 'not depressed'
-            if ent.text == action and ent.label_ == "Negative":
+            if ent.label_ == "Negative":
+               
                 negationcomment, severetotal = handle_negative(ent.text, negationcomment, severetotal, scoring)
             
             #if is not happy inverted positive to negative    
-            elif ent.text == action and ent.label_ == "Positive":
+            elif ent.label_ == "Positive":
+                
                 negationcomment, severetotal, positivetotal = handle_positive(ent.text, negationcomment, severetotal, positivetotal)
             
             else:  

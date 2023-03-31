@@ -1,16 +1,21 @@
-{% extends 'layout.html' %}
 
 {% block title %}Login{% endblock %}
 
-{% block content %}
 	<head>
 		<meta charset="utf-8">
 		<title>Login</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+		<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+
 	</head>
 	<body>
-		<div class="login">
+		{% extends 'sidebar.html' %}
+		<!-- Content -->
+		{% block content %}		
+			<div id="content">
+
+			<div class="login">
 			<h1>Login</h1>
 			<div class="links">
 
@@ -36,9 +41,9 @@
 
 			
 			</form>
-			
 		</div>
-	
+		</div>
+	</div>
 	
 		
 		

@@ -282,8 +282,10 @@ def create_app():
 
         
         @app.route('/')
+        @login_required
         def home():
             return render_template('home.html')
+            
 
         def messageReceived(methods=['GET', 'POST']):
             print('message was received!!!')
@@ -298,7 +300,6 @@ def create_app():
         
         @app.route('/login', methods=['GET', 'POST'])
         def login():
-
 
             form = LoginForm()
             print(form.validate_on_submit())
