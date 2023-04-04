@@ -5,6 +5,22 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+.flag_dashboard tbody{
+    background-color: #ff4b4b;
+    color: white;
+}
+.flag_dashboard tbody a{
+    color: white;
+}
+.flag_dashboard tbody .title{
+
+    text-align: center !important;
+}
+
+.flag_dashboard tbody a:hover{
+    background-color: #ff4b4b;
+    color: rgb(0, 247, 255);
+}
 body {
     background-color: #435165;
     margin: 0;
@@ -140,6 +156,9 @@ body.loggedin {
     margin: 25px 0;
     padding: 25px;
   background-color: #fff;
+}
+#calendarModal {
+    background: none !important;
 }
 
 .content .login, .content .register {

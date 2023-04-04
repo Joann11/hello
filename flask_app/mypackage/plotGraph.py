@@ -31,9 +31,9 @@ def sentenceAnalysis(text):
   
     averageC = []
 
-    count = 0
+   
     for sent in text.sents:
-        
+        count = 0
         score = 0   
         key = ""
        
@@ -44,16 +44,16 @@ def sentenceAnalysis(text):
 
             if ent.label_ == "Negative":
                    score -= keywords.negativedic.get(key)
-                   count += 1
-                    
+                      
             elif  ent.label_ == "Positive":
                     score += keywords.positivedic.get(key)
-                    count += 1
 
-
-        if score> 0 and count > 0:
+            count +=1           
+        if count > 0:
+      
             averageC.append(score/count) 
-            print(len(sent))    
+            print(len(sent)) 
+        
     
     
     print(averageC)
@@ -99,7 +99,7 @@ def plotGraphC(averageC):
     x = []
     
     for i in range(len(averageC)):
-        x.append(i+1)
+        x.append(i)
         print(i)
     
     plt.clf()
@@ -109,7 +109,7 @@ def plotGraphC(averageC):
     plt.xlabel('Sentences')
     plt.ylabel('Average Score ')
     plt.xticks(x)
-    plt.title('Ratio of Average Per Sentence')
+    plt.title('Ratio of Average Per Sentence(Keyword)')
     plt.legend()
     #plt.show()
     plt.savefig('static/my_plot.png')

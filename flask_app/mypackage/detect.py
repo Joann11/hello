@@ -49,10 +49,11 @@ def detect_adverb(text):
                                 elif prep_child.pos_ == 'ADJ':
                                     adv_function = 'manner'
                     if adv_function : 
-                              listadverb = [token.text, adv_function, score]
+                              listadverb = [token.text, adv_function, score, child.text]
                               print("ADVERB" + adv_function, score)
                               detectedadverbLists.append(listadverb)
-                              return adv_function, score
+                              
+                              
 
     return detectedadverbLists
 
@@ -65,14 +66,11 @@ def detectpersonalpronoun(text):
      sub = ""
      subject = None
        
-     for sent in text_doc.sents:
-               
-                                
+     for sent in text_doc.sents:   
                 for ent in sent.ents:
-                    for token in sent:
-                        
+                    for token in sent: 
                         for child in token.children:
-                            print("sign"+child.text)
+                         
                             if child.pos_ == 'PRON' and child.dep_ == 'nsubj':
                                         subject = child.text.lower()
                                         
@@ -91,11 +89,10 @@ def detectpersonalpronoun(text):
 
                                         print("The subject of the sentence is " + subject)
                                 
+                                        
+                                        print(ent.text, 'is attached to the subject:', subject)
 
-                                        print(token.text, 'is attached to the subject:', subject)
-
-                            else:
-                                    print(child.pos_)
+                            
    
     
      return sub

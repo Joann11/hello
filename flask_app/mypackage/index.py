@@ -212,8 +212,10 @@ def totalScore(text, severetotal, positivetotal):
      detectedadverbLists = detect.detect_adverb(text) 
      adscore = 0
      totalscore = 0
+     
      if detectedadverbLists :
                      for adverb in detectedadverbLists:
+
                             adscore += adverb[2]
 
 
@@ -241,9 +243,9 @@ def totalScoreComment(totalscore, positivetotal, severetotal, neu):
          
 
             if(totalscore == 0):
-                        comment = "<br> This sentences is Neutral</br>"
+                        comment = "<br> This sentence is Neutral</br>"
             elif(totalscore > 0):
-                        comment = "<br> This sentences is quite positive </br>"
+                        comment = "<br> This sentence is quite positive </br>"
             else: 
                         comment = "<br> This sentence is quite negative </br>"
             
@@ -252,20 +254,20 @@ def totalScoreComment(totalscore, positivetotal, severetotal, neu):
 
            # return html.render(comment = comment)
                           
-            comment = "Positive Score : "+"<b>" +str(positivetotal)+ "</b><br>" +" Negative Score : "+ "<b>"+str(severetotal)+ "</b><br>"+" Neutral Detected : "+ "<b>"+str(neu)+ "</b><br>"+ "Total Score: "+"<b> " + str(totalscore) +"</b>" + comment 
+            comment = "Positive Score : "+"<b>" +str(positivetotal)+ "</b><br>" +" Negative Score : "+ "<b> - "+str(severetotal)+ "</b><br>"+" Neutral Detected : "+ "<b>"+str(neu)+ "</b><br>"+ "Total Score: "+"<b> " + str(totalscore) +"</b>" + comment 
             comment += str(positivetotal) +" - " + str(severetotal) + " = " + str(totalscore)
             return  comment     # data = {"score" : 1}
 
             # return render_template("main.html", data=data)
 
 
-def PronounComment(severetotal, positivetotal):
+def PronounComment(totalscore,sent):
 
-            sub = detect.detectpersonalpronoun(getText())
+            sub = detect.detectpersonalpronoun(sent)
             comment = ""
             temp = 0
-            extraScore = 0
-            totalscore =  positivetotal - severetotal
+            extraScore = 1
+            
             #total analysis with personal pronounce analysed
             #get the score of the personal pronoun
             
@@ -284,13 +286,13 @@ def PronounComment(severetotal, positivetotal):
                         comment +=  "Total Score : " + "<b>"+ str(temp) 
 
             else:
-
-                comment = "No first person personal pronounce detected"
+                temp = totalscore
+                comment = "No first/third person personal pronoun detected"
         
             
             result = "<p>" +comment +"</p>"
 
-            return result 
+            return temp, result 
        
 
                 
@@ -315,14 +317,10 @@ def createWordTable():
             
          
             if token.text.lower() in detectedwords.keys():
-                print(token.text.lower() +"TEST")
-                # one-liner
-                # 
-               # keyList = list(detectedwords.keys())
+               
+               
                 sentiment = detectedwords.get(token.text.lower())
-               # val_list = list(detectedwords.values())
-               # position = keyList.index(token.text)
-               # print( val_list[position])
+              
                 
                 if sentiment == "Negative":
                         strW += " <mark class = \"negativeWord\">"  + token.text + "</mark> "
@@ -346,8 +344,7 @@ def createWordTable():
 
                     else:
                         foundP = "<mark class = \"pronoun\">" + token.text +"</mark> " 
-                        print(token.text +"pron")
-                        
+                      
                         
                     strW += foundP
                     strW += "</th>"
@@ -363,17 +360,21 @@ def createWordTable():
     for sent in text_doc.sents:
         for token in sent:
           strW += "<td>"
-          if token.text.lower() in detectedwords.keys():
-            sentiment = detectedwords.get(token.text.lower())
 
+          
+          token = token.text.lower()
+          if  token in detectedwords.keys():
+            sentiment = detectedwords.get(token)
+            
+            token = nlp(token)[0].lemma_
            
             if sentiment == "Negative":
                   
-                    scoring = negativedic.get(token.text.lower())
+                    scoring = negativedic.get(token)
                     strW +=  "-" + str(scoring)
 
             elif sentiment == "Positive":
-                    scoring = positivedic.get(token.text.lower())
+                    scoring = positivedic.get(token)
                     strW +=  str(scoring) 
 
             elif sentiment == "neg":
@@ -386,10 +387,9 @@ def createWordTable():
             strW += " "
           strW += "</td>"
 
-
-    strW += "<td>"+calculatescore_function()+"</td> </tr> </table>"
+        sumScore, comment = calculatescore_function(getText())
+    strW += "<td>"+ "Total Score:"+ str(sumScore) + ' '.join(comment)+"</td> </tr> </table>"
     
-
 
 
    # strW += token.text
@@ -454,13 +454,21 @@ def printSA():
 
 
 
-def calculatescore_function():
+
+def calculatescore_function(text_doc):
         #findkeywords
         
        
-            severetotal = 0
-            positivetotal = 0
-            text_doc = getText()
+           
+           
+            if text_doc == "":
+                text_doc = getText()
+            elif type(text_doc) is str  :
+                 text_doc= nlp(text_doc)
+                 
+
+            
+
             
             #sentences = [sent.text for sent in text_doc.sents]
 
@@ -469,38 +477,36 @@ def calculatescore_function():
             comment = ""
             neu = 0
             commentP = ""
-            result = ""
+            resultComment = []
             scores = []
             # Process each sentence separately
-
-            # for sent in text_doc.sents:
-            
-            #     for ent in sent.ents:
-
-            lemma = [token.lemma_ for token in text_doc]
-            text_doc = ' '.join(lemma)
-            text_doc = nlp(text_doc)
-            print(text_doc)
+            # lemma = [token.lemma_ for token in text_doc]
+            # text_doc = ' '.join(lemma)
+            # text_doc = nlp(text_doc)
+            # print(text_doc)
             key = ""
-            for ent in text_doc.ents :
+            sentences_score = []
+            for sent in text_doc.sents:
+                        finaltotalscore = 0
+                        severetotal = 0
+                        positivetotal = 0
+                        for ent in sent.ents:
                         
-                                    print("OK")
-                                    print(ent, ent.label_)
+                                    
                                     scoring = 0
                                     
                                     detectedwords[ent.text.lower()] = ent.label_
-                                    print(detectedwords)
+                                    
                                     
                                     word = nlp(ent.text)[0]
                                     key = word.lemma_
-
+                                  
                                     if ent.label_ == "Negative":
-                                        print(ent.text, key)
                                         scoring = negativedic.get(key)
                                         severetotal = severetotal + scoring
 
                                     elif  ent.label_ == "Positive":
-                                        scoring = positivedic.get(ent.text.lower())
+                                        scoring = positivedic.get(key)
                                         positivetotal = positivetotal + scoring
 
                                     elif  ent.label_ == "Neutral":
@@ -510,35 +516,40 @@ def calculatescore_function():
                                     for token in text_doc:
                                             if token.pos_ == 'PRON':
                                                             detectedwords[token.text.lower()] =  token.pos_
+                                            
 
                                             if token.dep_ == 'neg':
 
                                                 # Apply negation detection to this entity
                                                     negationcomment, severetotal, positivetotal = detect.detect_negation(token, ent, detectedwords, scoring, severetotal, positivetotal)
                                                 
-                                           #total analysis 
+                                           
                                             
                                        
-                            
-                                    totalscore = totalScore(text_doc, severetotal, positivetotal)
+                                    #total analysis per sent
+                                    totalscore = totalScore(sent, severetotal, positivetotal)
                                     comment = totalScoreComment(totalscore,positivetotal, severetotal, neu)
-                                    commentP =  str(PronounComment(severetotal, positivetotal))
-
-                                        
-            #count = str(plotGraph.sentenceAnalysis(text_doc))
-                    
-            #p,n,c = sentenceAnalysis()
-            #  plotGraph(p,n,c)
-
-            if not detectedwords:
-                            result = "no word detected" 
-            else:    
-                            result = comment + negationcomment + commentP 
-
-            return result
-
+                                    finaltotalscore, commentP =  PronounComment(totalscore, sent)
+                
             
-print(str(calculatescore_function()))
+                
+                                                                     
+                            #count = str(plotGraph.sentenceAnalysis(text_doc))
+                                    
+                            #p,n,c = sentenceAnalysis()
+                            #  plotGraph(p,n,c)
+
+                        sentences_score.append(finaltotalscore)
+                        resultComment.append(comment + negationcomment + str(commentP))
+                        
+                        if not detectedwords:
+                                resultComment.append("no word detected" ) 
+                
+                               
+        
+            #return result
+            print(sentences_score, resultComment)
+            return sum(sentences_score), resultComment
 
 
 

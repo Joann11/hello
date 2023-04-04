@@ -4,6 +4,8 @@ import spacy
 from spacy.symbols import ORTH
 from spacy.matcher import Matcher
 from spacy.matcher import PhraseMatcher
+import random
+
 #from spacy import displacy
 
 nlp = spacy.load('en_core_web_sm', disable=['ner']) 
@@ -18,6 +20,18 @@ nlp = spacy.load('en_core_web_sm', disable=['ner'])
 negativedic = {}
 positivedic = {}
 neutraldic = {}
+def asignRandomScoreForPositiveDic():
+ # Open the input and output files
+    with open('input.txt', 'r') as infile, open('posdicfile.txt', 'w') as outfile:
+    # Loop over each line (word) in the input file
+        for line in infile:
+        # Strip any whitespace from the line and add a random number between 1 and 4
+         new_line = line.strip() + ' ' + str(random.randint(1, 4))
+        # Write the modified line to the output file
+         outfile.write(new_line + '\n')
+
+
+
 
 def addnewKeyWordNegative_function(negdicfile):
 
@@ -33,7 +47,6 @@ def addnewKeyWordNegative_function(negdicfile):
                             
                          negativedic[key] = int(val)
 
-                         print(key)
             
             
             # for p in negativedic:

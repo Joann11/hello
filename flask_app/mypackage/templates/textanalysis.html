@@ -1,6 +1,4 @@
-{% extends 'layout.html' %}
-
-{% block title %}Main{% endblock %}
+{% block title %}Analysis{% endblock %}
 
 {% block content %}
 
@@ -31,6 +29,10 @@
         .sentence:hover .score {
             display: block;
         }
+        .scoredet{
+            background-color: #fff;
+            margin: 10px;
+        }
 
         .perSentence:hover  {
             outline-style:solid;
@@ -46,7 +48,7 @@
         .negationSign{
             background-color: rgb(255, 255, 106);
         }
-        .adverb_low{
+        .adverb{
             background-color: rgb(255, 179, 129);
         }
         .adverb_mid{
@@ -58,55 +60,74 @@
         .adverb_extreme{
             background-color: rgb(255, 102, 0);
         }
+        .sentence-content {
+    background-color: white;
+    margin: 10px;
+}
+    .pronSign{
+        background-color: rgb(255, 202, 133);
+    }
+.plot {
+  width: 400px;
+  height: 300px;
+  margin: 5%;
+}
+#scoreDiv{
+    display: none;
+}
+
+#overallscore{
+    background-color: #fff;
+    margin: 5%;
+}
+
+
     </style>
 </head>
 <body>
-    <h1>Sentiment Analysis</h1>
-    <form method="post" action="{{ url_for("analyze")}}">
-        <label for="input_text">Enter some text:</label><br>
-        <textarea id="input_text" name="input_text"></textarea><br>
-        <input type="submit" value="Analyze">
-    
-     </form>
-    <h1>Sentiment Analysis Results</h1>
+ 
     <p><b>Input text:</b>
     <span>{{ textP }}</span>
     </p>
     <hr>
-    <h2 >Sentences:</h2>
-    <div>
+    <h6>Sentences:</h6>
+    <div class = "sentence-content">
    
     {% for sent in sentences %}
+
     <span class = "perSentence">
     <span class="sentence " onmouseover="showTooltip({{ sent.id }})" onmouseout="hideTooltip({{ sent.id }})">
       
       {% for token in sent %}
         
         
-        {% if token.text in keywords %}
-            {% if token.text in negativedictionary%}
-                <span class="keyword negativekey" title="Score: {{ negativedictionary[token.text] }}">{{ token.text }}</span>
+        {% if token.text.lower() in keywords %}
+            {% if token.lemma_ in negativedictionary%}
+                <span class="keyword negativekey" title="Score: {{ negativedictionary[token.lemma_] }}">{{ token.text }}</span>
                 
-            {% elif token.text in posdictionary%}
-                <span class="keyword positivekey" title="Score: {{ posdictionary[token.text] }}">{{ token.text }}</span>
-            
+            {% elif token.lemma_ in posdictionary%}
+                <span class="keyword positivekey" title="Score: {{ posdictionary[token.lemma_] }}">{{ token.text }}</span>
+                 
+            {% elif token.lemma_ in neutraldictionary%}
+                <span class="keyword neutralkey" title="Score: {{ neutraldictionary[token.lemma_] }}">{{ token.text }}</span>
+                 
             {% elif token.dep_ == 'neg'%}
                 <span class="keyword negationSign" title="Found negation">{{ token.text }}</span>
-                
+            {% elif token.pos_ == 'PRON' %}
+                <span class="keyword pronSign" title="Found pronoun">{{ token.text }}</span>
+              
+ 
+                 
              
                 
                 
                 
-        {% endif %}
+            {% endif %}
         
-        {% if token.text in adverbs %}
 
-
-      
-
-        {% endif %}
-
-        
+        {% elif token.text.lower() in adverbs %}
+            <span class="keyword adverb" title="Found adverb">{{ token.text }}</span>
+         
         {% else %}
             <span>{{token.text}}</span>
     
@@ -114,13 +135,42 @@
    
       
   
-    {% endfor %}</span>  </span>
+    {% endfor %}</span>
+      </span>
     {% endfor %}
+</div>
+
+
+<div id= "overallscore">
+    Overall Score: {{total}} 
+    {% if total > 0%}
+
+    <b>Positive &#128154;</b>
+
+    {% elif total == 0%}
+    <b>Neutral</b>
+
+    {%else%}
+    <b>Negative &#128681;</b>
+    {% endif %}
+
+</div>
+
+<button type="button" onclick="myFunction()">Score Details</button>
+<div id="scoreDiv">
+    {% for c in comment %}
+
+        <div class="scoredet">
+            Sentence No: {{loop.index}}
+        <p> {{c | safe }}</p>   
+        </div>
+    {%endfor%}
+
 </div>
 
 <div>
     
-    <img src="{{url_for('static', filename='my_plot.png')}}">"
+    <img class="plot" src="{{url_for('static', filename='my_plot.png')}}">
 
 </div>
     <script>
@@ -138,6 +188,15 @@
             kw.removeAttribute('title');
           });
         }
+
+        function myFunction() {
+        var x = document.getElementById("scoreDiv");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
       </script>
   
 </body>

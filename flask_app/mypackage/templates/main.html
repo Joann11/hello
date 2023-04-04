@@ -3,6 +3,7 @@
 {% block title %}Main{% endblock %}
 
 {% block content %}
+<div>
 <form action="{{ url_for("gfg")}}" method="post">
     <title>Sentimental Analysis For Mental Health</title>
   
@@ -26,7 +27,7 @@
     <h3>EXAMPLE:</h3>
     <mark class="positiveWord">POSITIVE keyword indicated in green </mark>
     <br>
-    <mark>NEGATIVE keyword indicated in yellow </mark>
+    <mark class="negativeWord">NEGATIVE keyword indicated in yellow </mark>
     <br>
     <mark class="negation">NEGATION keyword indicated in red </mark>
     
@@ -44,5 +45,5 @@
     <li>The Score is determined by the score of the Negated Keyword such as NOT happy will be -4 if HAPPY:4 </li>
     
     {% endif %}
-    
+  </div>  
 {% endblock %}

@@ -6,7 +6,47 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<h2>Home Page</h2>
-<p>Welcome back, {{ username }}!</p>
+<h2>Admin Dashboard</h2>
+<p>Welcome back admin, {{ adminuser.username }}!</p>
+<div class = "flag_dashboard">
+<table >
+    <tr class = "title">
+        <th>Flagged Post Today : {{date}}</th>
+        <th>Score</th>
+        <th>User</th>
+      </tr>
+  
+{%for post in posts%}
+<tr>
+   <td> <a href="{{ url_for('profilebackend' , username=post.author.username, postid = post.id) }}">  {{post.text}}</a> </td>
+   <td> {{post.postscore}}</td>
+   <td> <a href="{{ url_for('profilebackend' , username=post.author.username, postid = post.id) }}">  {{post.author.username}}</a> </td>
+   
+  </tr>
+ 
+{% endfor %}</table></div>
+
+
+<div class = "flag_dashboard">
+    <table >
+        <tr class = "title">
+            <th>Flagged User {{date}}</th>
+            <th>Score</th>
+           
+          </tr>
+      
+    {%for user in users%}
+    <tr>
+       <td> <a href="{{ url_for('profilebackend' , username=user.username)}}">  {{user.username}}</a> </td>
+       <td> {{user.score}}</td>
+       
+      </tr>
+     
+    {% endfor %}</table></div>
+    
+    
+
+
 {% endblock %}
+
 </html>

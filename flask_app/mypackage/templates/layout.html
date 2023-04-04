@@ -13,14 +13,23 @@
 				<h1>SH Project</h1>
                 <a href="{{ url_for('home') }}"><i class="fas fa-home"></i>Home</a>
                 <a href="{{ url_for('gfg') }}"><i class="fa-solid fa-text"></i>Text Analysis</a>
-                <a href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i>Profile</a>
+                <a href="{{ url_for('professionaldashboard') }}"><i class="fas fa-user-circle"></i>Users</a>
+				<a href="{{ '/admin' }}"><i class="fas fa-user-circle"></i>Administration</a>
 				
-                <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+                <a href="{{ url_for('adminlogout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a>
                 
             </div>
 		</nav>
 		<div class="content">
-			{% block content %}{% endblock %}
+			{% block content %}
+			{% with messages = get_flashed_messages() %}
+			{% if messages %}
+			  <ul class=flashes>
+			  {% for message in messages %}
+				<li>{{ message }}</li>
+			  {% endfor %}
+			  </ul>
+			{% endif %}{% endwith %}{% endblock %}
 		</div>
 	</body>
 </html>

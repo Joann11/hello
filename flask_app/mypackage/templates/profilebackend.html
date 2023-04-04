@@ -67,6 +67,11 @@
       .adverb_extreme{
           background-color: rgb(255, 102, 0);
       }
+      #popup {
+    display: none;
+      }
+
+      
   </style>
     
     
@@ -91,44 +96,38 @@
                 {
                     id: '{{ userpost.id }}',
                     title: '{{ userpost.text }}',
-                    start: '{{ userpost.date }}'
+                    start: '{{ userpost.date }}',
+                    {% if userpost.postscore > 0%}
+                    color: '#56E300'
+                    {%elif userpost.postscore < 0%}
+                    color: '#FF4545'
+                    {% else%}
+                    color: '#2BE6FF'
+                    {%endif%}
                 }{% if not loop.last %},{% endif %}
             {% endfor %}
           ],
+
             eventClick:  function(arg) {
              // arg.jsEvent.preventDefault(); 
              $.ajax({
-                url: "postanalyze",
+                url: "analyze",
                 type: 'POST',
                 data: {'post_id': arg.event.id},
+
                 success: function(response, status) {
                   console.log(response.sentences)
                     var current_id = arg.event.id;
                    $('#calendarModal').modal();
                     $('#modalTitle').html(arg.event.start);
-                    $('#modalBody').html(response.data);
+                   // $('#modalBody').html(response.data);
+
+                      // opens events in a popup window
+                    $('#modalBody').html('<iframe src="'+response.url+'" width="450" height="600"></iframe>');
+                    $('#modalBody').dialog({autoOpen: false, modal: true, width: 750, height: 675});
+                    return false;
                    
-                    {% for userpost in posts %}
-                        console.log( '{{userpost.id}}', current_id);
-                        
-                          var up = {{userpost.id}};
-                        
-                        {% if up == current_id %}
-                        console.log( '{{userpost.id}}', current_id);
-                        
-                        console.log(status)
-                          var perSentence = $('#perSentence'); 
-                    
-                   
-                        var html = ' <span class = "perSentence">';
-                           html += '<span class="sentence " onmouseover="showTooltip({{ '+ sentence.id +' }})" onmouseout="hideTooltip({{'+  sentence.id +'}})">';
-                           html += '<p> hello </p>'; 
-                           perSentence.append(html);
-                        
-                        {% else %}
-                         
-                        {% endif %}
-                      {% endfor %}
+             
 
 
                    
@@ -148,10 +147,6 @@
                              sentenceA.empty();
                              sentences.forEach(function(sentence) {
                                sentenceA.append(sentence);
-                                 // var html = ' <span class = "perSentence">';
-                                 //   html += '<span class="sentence " onmouseover="showTooltip({{ '+ sentence.id +' }})" onmouseout="hideTooltip({{'+  sentence.id +'}})">';
-                                      
-                
 
 
                              });
@@ -187,11 +182,40 @@
   
 
 <body>
-<h2>Home Page</h2>
+<h2>User Profile</h2>
 <div class = "content">
 
-<p>User: {{ username }}!</p>
+<p>User: {{ user.username }}</p>
+<p>First Name: {{ user.last_name }}</p>
+<p>Last Name: {{ user.first_name }}</p>
+<p>Email: {{ user.email }}</p>
 
+<div id="scoreboard">
+  
+  {% if user.score > 0 %}
+  <div id = "statusgreen">
+
+   Status: Positive &#128154;
+
+  </div>
+  {% elif user.score == 0 %}
+  <div id = "statusneutral">
+
+   Status: 0 &#128154;
+
+  </div>
+  {%else%}
+  <div id = "statusred">
+
+    Status: Negative &#128681;
+ 
+   </div>
+   {% endif %}
+   Totalscore: {{ user.score }}
+
+   <button type="button" class="btn btn-default" style="
+   background: red; color: #ffffff; float: right;">Message</button>
+</div>
   <div id='calendar'></div>
 
     <!-- Modal -->
@@ -203,7 +227,9 @@
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
                 <h4 id="modalTitle" class="modal-title"></h4>
             </div>
-            <div id="modalBody" class="modal-body"> 
+            <div id="modalBody" class="modal-body">
+              
+              <div id="popup"></div>
               User: {{ username }}
               <h3>Post Analysis</h3>
                               
@@ -216,6 +242,9 @@
 {% endif %}
               </p>
               <hr>
+
+              
+
               <h2 >Sentences:  </h2>
              <div id = "sentanalysis">
               

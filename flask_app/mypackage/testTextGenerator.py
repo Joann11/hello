@@ -18,7 +18,6 @@ def generaterandomSentTest(keywordtype):
       # Declaring names, verbs and nouns
         names=["You","I","They","He","She","Robert","Steve"]
         verbs=["was", "is", "are", "were"]
-        nouns=["playing cricket.", "watching television.", "singing.", "fighting.", "cycling."]
         negsent = negativedic
         sent = ""
         t = random.randint(0,10)

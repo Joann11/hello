@@ -10,6 +10,10 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
 	</head>
 	<body>
+		{% if error %}  
+        <p><strong>Error</strong>: {{error}}</p>  
+    {% endif %}  
+  
 		<div class="login">
 			<h1>Admin Login</h1>
 			<div class="links">
